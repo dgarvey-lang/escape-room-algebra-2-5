@@ -1,0 +1,839 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Escape the Radical Manor</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Creepster&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=STIX+Two+Text:ital,wght@0,400;0,600;1,400&display=swap">
+<style>
+/* Layout: single haunted-house column; the hall is a grid of doors, each room is one lit panel. Deliberately dark-only. */
+:root{
+  --night:#110D18; --wall:#1A1424; --panel:#221A2E; --line:#3B2F4C; --bone:#F2EADB; --mist:#AA9EBB;
+  --pumpkin:#FF8A1F; --pumpkin-ink:#1B0E02; --candle:#FFD36B; --slime:#8EE26C; --slime-bg:#17301A;
+  --blood:#FF7A70; --blood-bg:#3A1518; --glow:rgba(255,138,31,.35);
+  --f-display:"Creepster","Impact",fantasy; --f-body:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;
+  --f-math:"STIX Two Text","Cambria Math","Times New Roman",serif;
+  color-scheme:dark;
+}
+html,body{min-height:100%}
+[hidden]{display:none!important}
+body{background:var(--night);color:var(--bone);font-family:var(--f-body);font-size:17px;line-height:1.5;
+  background-image:radial-gradient(ellipse 80% 40% at 50% 0%,#2A1C3A 0%,transparent 70%),radial-gradient(circle at 85% 8%,rgba(255,211,107,.10) 0 40px,transparent 41px);}
+.wrap{max-width:720px;margin:0 auto;padding-block:24px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:18px}
+header{display:flex;flex-direction:column;gap:4px;position:relative}
+h1{font-family:var(--f-display);font-weight:400;font-size:clamp(36px,9vw,58px);line-height:1;margin:0;color:var(--pumpkin);letter-spacing:.02em;text-shadow:0 0 18px var(--glow);text-wrap:balance}
+.sub{color:var(--mist);margin:0;font-size:15px}
+.ghostfloat{position:absolute;right:4px;top:0;width:54px;color:var(--bone);opacity:.85}
+@media (prefers-reduced-motion:no-preference){
+  .ghostfloat{animation:bob 4s ease-in-out infinite}
+  @keyframes bob{50%{transform:translateY(-8px) rotate(-4deg)}}
+  .pop{animation:pop .4s ease-out}@keyframes pop{from{transform:scale(.95);opacity:.3}to{transform:none;opacity:1}}
+  .flame{animation:flick 1.6s ease-in-out infinite;transform-origin:16px 12px}@keyframes flick{50%{transform:scaleY(.85) skewX(4deg)}}
+}
+.inv{display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:var(--wall);border:1px solid var(--line);border-radius:12px;padding:8px 12px}
+.inv .lbl{font-size:12px;letter-spacing:.09em;text-transform:uppercase;color:var(--mist);font-weight:700;margin-right:4px}
+.slot{width:40px;height:40px;border-radius:8px;border:1.5px dashed var(--line);display:grid;place-items:center;color:var(--line)}
+.slot svg{width:26px;height:26px}
+.slot.got{border:1.5px solid var(--pumpkin);color:var(--pumpkin);background:var(--panel);box-shadow:0 0 10px var(--glow)}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px clamp(16px,4vw,28px);display:flex;flex-direction:column;gap:16px}
+.eyebrow{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--mist);font-weight:700;margin:0}
+h2{font-family:var(--f-display);font-weight:400;font-size:clamp(28px,7vw,38px);margin:0;color:var(--candle);letter-spacing:.03em;line-height:1.05}
+.story{margin:0;color:var(--bone);font-style:italic;max-width:62ch}
+/* hall */
+.doors{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px}
+.door{all:unset;box-sizing:border-box;cursor:pointer;background:var(--wall);border:1.5px solid var(--line);border-radius:60px 60px 10px 10px;padding:22px 16px 14px;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;min-height:170px;justify-content:flex-end}
+.door svg{width:38px;height:38px}
+.door .rn{font-family:var(--f-display);font-size:24px;letter-spacing:.03em;line-height:1}
+.door .st{font-size:13px;color:var(--mist);font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+.door.open{border-color:var(--pumpkin);box-shadow:0 0 18px var(--glow);color:var(--pumpkin)}
+.door.open .st{color:var(--pumpkin)}
+.door.done{color:var(--slime);border-color:var(--slime);cursor:default}
+.door.done .st{color:var(--slime)}
+.door.locked{color:var(--line);cursor:not-allowed}
+.door.locked .rn{color:var(--mist);opacity:.6}
+.door.side{border-radius:12px;color:var(--candle);border-style:dashed}
+.door.side .st{color:var(--mist);text-transform:none;letter-spacing:0;font-weight:400}
+.door:focus-visible{outline:3px solid var(--candle);outline-offset:3px}
+/* math */
+.eq{font-family:var(--f-math);font-size:clamp(28px,7.5vw,40px);text-align:center;padding:12px 0 4px;line-height:1.4;overflow-x:auto;color:var(--bone)}
+.m{font-family:var(--f-math);font-size:1.15em}
+i{font-style:italic}
+sup{font-size:.6em;vertical-align:.8em;line-height:0}
+.fr{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;font-size:.92em;margin:0 .12em;line-height:1.15}
+.fr>span{padding:0 .15em}
+.fr>.de{border-top:1.5px solid currentColor}
+.rad{border-top:1.5px solid currentColor;padding:0 .1em;margin-left:.04em}
+.lock{border:2px solid var(--line);border-radius:14px;background:var(--wall);padding:6px 10px 14px;display:flex;flex-direction:column;gap:12px}
+.answers{display:flex;flex-wrap:wrap;align-items:center;gap:10px;justify-content:center}
+.answers label{font-family:var(--f-math);font-size:22px}
+input[type=text]{font-family:var(--f-math);font-size:21px;padding:8px 12px;border:2px solid var(--line);border-radius:10px;background:var(--night);color:var(--bone);width:170px;min-width:0}
+input[type=text]:focus{outline:none;border-color:var(--pumpkin)}
+.keys{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.key{font-family:var(--f-math);font-size:20px;min-width:48px;padding:4px 10px;border:1.5px solid var(--line);border-radius:8px;background:var(--panel);color:var(--bone);cursor:pointer}
+.key:hover{border-color:var(--pumpkin)}
+.tip{font-size:14px;color:var(--mist);text-align:center;margin:0}
+.actions{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+button{font-family:var(--f-body)}
+.btn{font-size:16px;font-weight:700;padding:10px 18px;border-radius:10px;border:2px solid var(--pumpkin);cursor:pointer;display:inline-flex;align-items:center;gap:8px}
+.btn svg{width:20px;height:20px}
+.btn.primary{background:var(--pumpkin);color:var(--pumpkin-ink)}
+.btn.ghost{background:transparent;color:var(--pumpkin)}
+.btn.quiet{background:transparent;color:var(--mist);border-color:var(--line)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+button:focus-visible,input:focus-visible{outline:3px solid var(--candle);outline-offset:2px}
+.hints{display:flex;flex-direction:column;gap:10px}
+.hintbox{background:var(--wall);border:1.5px solid var(--line);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:10px}
+.hintbox .who{display:flex;align-items:center;gap:8px;color:var(--mist);font-size:14px;font-style:italic}
+.hintbox .who svg{width:24px;height:24px;color:var(--bone)}
+.step{border-left:3px solid var(--pumpkin);padding:2px 0 2px 14px}
+.step p{margin:0}
+.step .m{display:block;margin-top:6px;font-size:1.25em;overflow-x:auto}
+.step .n{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--pumpkin);font-weight:700}
+.fb{border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+.fb.good{background:var(--slime-bg);border:1.5px solid var(--slime)}
+.fb.bad{background:var(--blood-bg);border:1.5px solid var(--blood)}
+.fb.note{background:var(--wall);border:1.5px dashed var(--candle)}
+.fb h3{margin:0;font-family:var(--f-display);font-weight:400;font-size:26px;letter-spacing:.03em}
+.fb.good h3{color:var(--slime)} .fb.bad h3{color:var(--blood)} .fb.note h3{color:var(--candle)}
+.fb p{margin:0}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-weight:700}
+.field input{width:100%;font-family:var(--f-body);font-size:18px}
+.types{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.type{font-family:var(--f-math);font-size:17px;padding:6px 12px;border-radius:999px;border:1.5px solid var(--line);background:var(--wall);color:var(--bone);cursor:pointer}
+.type[aria-pressed="true"]{border-color:var(--slime);color:var(--slime)}
+/* certificate */
+.cert{border:3px double var(--candle);border-radius:16px;padding:26px clamp(16px,5vw,36px);text-align:center;display:flex;flex-direction:column;gap:12px;background:radial-gradient(ellipse at 50% 0%,#2E2240 0%,var(--panel) 70%)}
+.cert .big{font-family:var(--f-display);font-size:clamp(36px,9vw,54px);color:var(--pumpkin);line-height:1;text-shadow:0 0 18px var(--glow)}
+.cert .nm{font-size:clamp(24px,6vw,32px);font-weight:700;border-bottom:1.5px solid var(--line);padding-bottom:6px;margin:0 auto;min-width:60%}
+.codebox{font-family:var(--f-body);font-weight:700;font-size:clamp(32px,9vw,48px);letter-spacing:.12em;color:var(--pumpkin-ink);background:var(--candle);border-radius:12px;padding:8px 14px;user-select:all;align-self:center}
+.stats{display:flex;justify-content:center;gap:20px;flex-wrap:wrap;color:var(--mist);font-size:15px;font-variant-numeric:tabular-nums}
+.stats b{color:var(--bone)}
+.certitems{display:flex;justify-content:center;gap:10px;color:var(--pumpkin)}
+.certitems svg{width:30px;height:30px}
+/* spellbook overlay */
+.overlay{position:fixed;inset:0;background:rgba(8,6,12,.82);z-index:20;overflow-y:auto;padding-block:max(24px,env(safe-area-inset-top,0px)) 24px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.overlay .card{max-width:640px;margin:0 auto}
+.foot{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;font-size:14px;color:var(--mist)}
+.link{background:none;border:none;color:var(--mist);text-decoration:underline;cursor:pointer;font-size:14px;padding:0}
+.small{font-size:14px;color:var(--mist);margin:0}
+.center{text-align:center}
+/* scene + sound */
+.scene{position:relative;border-radius:16px;overflow:hidden;border:1px solid var(--line);height:clamp(160px,34vw,240px);background:#160E24}
+.scene>svg.bg{position:absolute;inset:0;width:100%;height:100%;display:block}
+.fog{position:absolute;left:-50%;width:200%;height:70px;bottom:-10px;pointer-events:none;background:radial-gradient(ellipse 18% 60% at 20% 60%,rgba(200,190,220,.16),transparent 70%),radial-gradient(ellipse 22% 55% at 55% 70%,rgba(200,190,220,.13),transparent 70%),radial-gradient(ellipse 16% 50% at 85% 60%,rgba(200,190,220,.15),transparent 70%)}
+.fog.f2{bottom:10px;opacity:.7}
+.scene .ghostfloat{position:absolute;left:12%;top:18%;right:auto;width:clamp(34px,7vw,52px);height:auto;opacity:.75;color:#EDE6F5}
+.titlebar{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-top:12px}
+.titlebar>div:first-child{min-width:0;flex:1 1 300px}
+.sound{display:flex;gap:8px;flex-wrap:wrap}
+.tog{font-size:14px;font-weight:700;padding:7px 12px;border-radius:999px;border:1.5px solid var(--line);background:var(--wall);color:var(--mist);cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.tog svg{width:16px;height:16px}
+.tog[aria-pressed="true"]{border-color:var(--candle);color:var(--candle);box-shadow:0 0 10px rgba(255,211,107,.25)}
+.roomart{border-radius:12px;overflow:hidden;border:1px solid var(--line);background:#120C1C;height:clamp(110px,24vw,150px)}
+.roomart svg{width:100%;height:100%;display:block}
+.burst{position:fixed;width:34px;height:34px;color:#0B0810;pointer-events:none;z-index:30;filter:drop-shadow(0 0 6px rgba(255,138,31,.7))}
+.burst.lite{color:var(--pumpkin)}
+.flyer,.flap,.win,.bub,.drift,.sway,.eyes{transform-box:fill-box;transform-origin:center}
+@media (prefers-reduced-motion:no-preference){
+  .fog{animation:fogmove 38s linear infinite}.fog.f2{animation-duration:60s;animation-direction:reverse}
+  @keyframes fogmove{to{transform:translateX(25%)}}
+  .flyer.b1{animation:fly1 14s linear infinite}.flyer.b2{animation:fly1 19s linear infinite -7s}.flyer.b3{animation:fly2 23s linear infinite -3s}
+  @keyframes fly1{0%{transform:translate(-60px,70px)}25%{transform:translate(180px,30px)}50%{transform:translate(380px,60px)}75%{transform:translate(560px,20px)}100%{transform:translate(800px,50px)}}
+  @keyframes fly2{0%{transform:translate(800px,40px) scaleX(-1)}50%{transform:translate(400px,90px) scaleX(-1)}100%{transform:translate(-80px,30px) scaleX(-1)}}
+  .flap{animation:flap .28s ease-in-out infinite alternate}@keyframes flap{to{transform:scaleY(.35)}}
+  .win{animation:winf 3.2s ease-in-out infinite}.win.w2{animation-delay:-1.3s;animation-duration:4.1s}.win.w3{animation-delay:-2.2s;animation-duration:2.6s}
+  @keyframes winf{0%,100%{opacity:1}45%{opacity:.55}50%{opacity:.9}55%{opacity:.4}}
+  .drift{animation:drift 30s ease-in-out infinite alternate}@keyframes drift{to{transform:translateX(-120px)}}
+  .bub{animation:bub 1.8s ease-in infinite}.bub.d2{animation-delay:-.6s}.bub.d3{animation-delay:-1.2s}
+  @keyframes bub{0%{transform:translateY(0) scale(.6);opacity:0}20%{opacity:1}100%{transform:translateY(-34px) scale(1.2);opacity:0}}
+  .sway{animation:sway 3s ease-in-out infinite alternate}@keyframes sway{from{transform:rotate(-6deg)}to{transform:rotate(6deg)}}
+  .eyes{animation:blink 5s infinite}@keyframes blink{0%,92%,100%{transform:scaleY(1)}95%{transform:scaleY(.1)}}
+  .scene .ghostfloat{animation:ghostpath 16s ease-in-out infinite}
+  @keyframes ghostpath{0%,100%{transform:translate(0,0)}25%{transform:translate(40px,-10px) rotate(-5deg)}50%{transform:translate(10px,14px)}75%{transform:translate(-20px,-6px) rotate(4deg)}}
+}
+.search{position:relative;height:clamp(250px,56vw,320px);border-radius:12px;overflow:hidden;border:1px solid var(--line);touch-action:none;user-select:none;-webkit-user-select:none}
+.search>svg.sbg{position:absolute;inset:0;width:100%;height:100%;display:block}
+.sobj{position:absolute;width:clamp(80px,22%,130px);aspect-ratio:1;transform:translate(-50%,-50%);cursor:grab;touch-action:none;background:none;border:0;padding:0;z-index:2}
+.sobj svg{width:100%;height:100%;display:block;filter:drop-shadow(0 6px 6px rgba(0,0,0,.55));pointer-events:none;transition:transform .15s}
+.sobj.drag{cursor:grabbing;z-index:5}.sobj.drag svg{transform:scale(1.06) rotate(-3deg);filter:drop-shadow(0 14px 10px rgba(0,0,0,.6))}
+.sobj.slide{transition:left .35s ease-out,top .35s ease-out}
+.sobj:focus-visible{outline:3px solid var(--candle);outline-offset:2px;border-radius:10px}
+.sitem{position:absolute;width:50px;height:50px;transform:translate(-50%,-50%);z-index:1;border:0;border-radius:50%;padding:6px;color:var(--pumpkin);background:radial-gradient(circle,rgba(255,211,107,.45),transparent 70%)}
+.sitem svg{width:100%;height:100%;display:block}
+.sitem:not(.found){opacity:0}
+.sitem.found{z-index:6;cursor:pointer}
+.spider{position:absolute;width:28px;height:28px;transform:translate(-50%,-50%);z-index:1;color:#0B0810;pointer-events:none}
+.spider svg{width:100%;height:100%}
+.shint{position:absolute;left:8px;right:8px;bottom:8px;text-align:center;font-size:14px;font-weight:700;color:var(--bone);text-shadow:0 1px 3px #000,0 0 8px #000;pointer-events:none;z-index:7}
+.slot.pop{animation:none}
+@media (prefers-reduced-motion:no-preference){
+  .sitem.found{animation:glow .9s ease-in-out infinite alternate}@keyframes glow{from{box-shadow:0 0 6px 2px rgba(255,211,107,.4)}to{box-shadow:0 0 26px 10px rgba(255,211,107,.7)}}
+  .sobj.wiggle svg{animation:wig .18s ease-in-out 6 alternate}@keyframes wig{from{transform:rotate(-7deg)}to{transform:rotate(7deg)}}
+  .slot.pop{animation:slotpop .6s ease-out}@keyframes slotpop{0%{transform:scale(1.6)}100%{transform:none}}
+}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-key" viewBox="0 0 32 32"><circle cx="9" cy="16" r="5.5" fill="none" stroke="currentColor" stroke-width="3"/><path d="M14.5 16H29M24 16v5M28 16v4" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round"/></symbol>
+    <symbol id="i-candle" viewBox="0 0 32 32"><rect x="11" y="14" width="10" height="15" rx="1.5" fill="currentColor"/><path class="flame" d="M16 3c3.5 4 3.5 7.5 0 9.5c-3.5-2-3.5-5.5 0-9.5z" fill="var(--candle)"/></symbol>
+    <symbol id="i-potion" viewBox="0 0 32 32"><path d="M12.5 3h7v2h-1v6l6.5 9.5A6 6 0 0 1 20 29h-8a6 6 0 0 1-5-8.5L13.5 11V5h-1z" fill="currentColor"/></symbol>
+    <symbol id="i-bat" viewBox="0 0 32 32"><path d="M16 11l-1.6-2.4-.9 2.6C10 8.5 5 8.8 1 12c3 .3 4.4 2.4 4.2 5 2.3-1.5 4.6-.8 5.6 1.4 1.4-1.3 3.5-1.3 5.2 1 1.7-2.3 3.8-2.3 5.2-1 1-2.2 3.3-2.9 5.6-1.4-.2-2.6 1.2-4.7 4.2-5-4-3.2-9-3.5-12.5-.8l-.9-2.6z" fill="currentColor"/></symbol>
+    <symbol id="i-skull" viewBox="0 0 32 32"><path d="M16 3C9.4 3 5 7.8 5 13.6c0 3.6 1.8 6 4 7.2V27h14v-6.2c2.2-1.2 4-3.6 4-7.2C27 7.8 22.6 3 16 3z" fill="currentColor"/><circle cx="11.8" cy="14" r="3" fill="var(--night)"/><circle cx="20.2" cy="14" r="3" fill="var(--night)"/><path d="M14 27v-3M18 27v-3" stroke="var(--night)" stroke-width="1.5"/></symbol>
+    <symbol id="i-pumpkin" viewBox="0 0 32 32"><path d="M16 9c0-3 1.4-5 3.6-6" stroke="var(--slime)" stroke-width="2.5" fill="none" stroke-linecap="round"/><ellipse cx="10.5" cy="19" rx="7" ry="9" fill="currentColor"/><ellipse cx="21.5" cy="19" rx="7" ry="9" fill="currentColor"/><ellipse cx="16" cy="19" rx="6" ry="9.5" fill="currentColor" stroke="var(--panel)" stroke-width="1"/></symbol>
+    <symbol id="i-ghost" viewBox="0 0 32 32"><path d="M7 29V14a9 9 0 0 1 18 0v15l-3-3-3 3-3-3-3 3-3-3z" fill="currentColor"/><ellipse cx="12.5" cy="14" rx="1.8" ry="2.4" fill="var(--night)"/><ellipse cx="19.5" cy="14" rx="1.8" ry="2.4" fill="var(--night)"/></symbol>
+    <symbol id="i-book" viewBox="0 0 32 32"><path d="M6 6a3 3 0 0 1 3-3h17v22H9a3 3 0 0 0-3 3z" fill="currentColor"/><path d="M6 28a3 3 0 0 1 3-3h17v4H9a3 3 0 0 1-3-1z" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M16 8v8M12 12h8" stroke="var(--panel)" stroke-width="2"/></symbol>
+    <symbol id="i-door" viewBox="0 0 32 32"><path d="M7 29V12a9 9 0 0 1 18 0v17z" fill="none" stroke="currentColor" stroke-width="2.5"/><circle cx="20" cy="19" r="1.6" fill="currentColor"/></symbol>
+  </defs>
+</svg>
+
+<div class="wrap">
+  <header>
+    <div class="scene">
+      <svg class="bg" viewBox="0 0 720 240" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+        <defs>
+          <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#120A20"/><stop offset=".65" stop-color="#2D1A44"/><stop offset="1" stop-color="#4A2A4E"/></linearGradient>
+          <radialGradient id="mglow"><stop offset="0" stop-color="#FFE9B0" stop-opacity=".45"/><stop offset="1" stop-color="#FFE9B0" stop-opacity="0"/></radialGradient>
+          <radialGradient id="pglow"><stop offset="0" stop-color="#FF8A1F" stop-opacity=".6"/><stop offset="1" stop-color="#FF8A1F" stop-opacity="0"/></radialGradient>
+        </defs>
+        <rect width="720" height="240" fill="url(#sky)"/>
+        <g fill="#EDE3FF" opacity=".7"><circle cx="40" cy="30" r="1.2"/><circle cx="120" cy="60" r="1"/><circle cx="210" cy="22" r="1.4"/><circle cx="300" cy="48" r="1"/><circle cx="470" cy="28" r="1.2"/><circle cx="680" cy="40" r="1.3"/><circle cx="520" cy="70" r="1"/><circle cx="650" cy="110" r="1"/><circle cx="90" cy="110" r="1"/></g>
+        <circle cx="590" cy="72" r="90" fill="url(#mglow)"/>
+        <circle cx="590" cy="72" r="38" fill="#F7E9BE"/>
+        <circle cx="578" cy="62" r="7" fill="#E8D7A4"/><circle cx="604" cy="84" r="5" fill="#E8D7A4"/><circle cx="598" cy="56" r="3" fill="#E8D7A4"/>
+        <g class="drift" fill="#2A1A3C" opacity=".85"><ellipse cx="640" cy="80" rx="70" ry="9"/><ellipse cx="610" cy="92" rx="48" ry="7"/></g>
+        <path d="M0 175 Q120 140 240 168 T480 152 T720 162 V240 H0z" fill="#1E1430"/>
+        <!-- dead tree -->
+        <g stroke="#0B0810" fill="none" stroke-linecap="round">
+          <path d="M120 210 C124 175 112 150 122 118 C128 98 116 84 104 70" stroke-width="9"/>
+          <path d="M120 140 C140 128 150 112 170 104" stroke-width="5"/><path d="M162 108 l14 -14 M166 106 l16 4" stroke-width="3"/>
+          <path d="M117 160 C96 150 86 138 70 134" stroke-width="5"/><path d="M78 136 l-14 -12 M82 137 l-16 6" stroke-width="3"/>
+          <path d="M108 80 l-18 -10 M106 76 l6 -18" stroke-width="3"/>
+        </g>
+        <g class="sway" style="transform-origin:50% 0"><line x1="152" y1="108" x2="152" y2="124" stroke="#0B0810" stroke-width="1.2"/><rect x="146" y="124" width="12" height="15" rx="3" fill="#0B0810"/><rect x="148.5" y="127" width="7" height="9" rx="2" fill="#FFB347" class="win w3"/></g>
+        <!-- house -->
+        <g fill="#0B0810">
+          <rect x="220" y="142" width="58" height="68"/><polygon points="212,145 249,112 286,145"/>
+          <rect x="270" y="112" width="150" height="98"/><polygon points="258,115 345,58 432,115"/>
+          <rect x="298" y="64" width="13" height="36" transform="rotate(-6 304 82)"/>
+          <rect x="380" y="70" width="42" height="140"/><polygon points="372,73 401,14 430,73"/>
+          <path d="M401 14 v-10" stroke="#0B0810" stroke-width="2"/>
+        </g>
+        <g fill="#FFB347">
+          <rect class="win" x="236" y="160" width="14" height="18"/>
+          <rect class="win w2" x="284" y="126" width="14" height="20"/>
+          <rect class="win w3" x="318" y="126" width="14" height="20"/>
+          <rect class="win" x="352" y="126" width="14" height="20" opacity=".35"/>
+          <rect class="win w2" x="284" y="164" width="14" height="20" opacity=".4"/>
+          <rect class="win" x="394" y="122" width="14" height="22"/>
+          <circle class="win w3" cx="401" cy="92" r="7"/>
+          <circle class="win w2" cx="345" cy="94" r="7"/>
+        </g>
+        <path d="M352 210 v-26 a10 10 0 0 1 20 0 v26z" fill="#3A1F2E"/>
+        <g class="eyes"><circle cx="397" cy="131" r="1.6" fill="#0B0810"/><circle cx="405" cy="131" r="1.6" fill="#0B0810"/></g>
+        <!-- ground -->
+        <path d="M0 204 Q180 192 360 206 T720 200 V240 H0z" fill="#0B0810"/>
+        <g fill="#140E1C"><path d="M470 210 v-24 a11 11 0 0 1 22 0 v24z"/><path d="M515 212 v-30 h-9 v-8 h9 v-9 h8 v9 h9 v8 h-9 v30z"/><path d="M552 212 v-18 a9 9 0 0 1 18 0 v18z"/><path d="M630 214 v-26 a12 12 0 0 1 24 0 v26z"/></g>
+        <g stroke="#140E1C" stroke-width="2"><path d="M440 214 V190 M452 214 V188 M464 214 V190 M596 214 V190 M608 214 V188 M620 214 V190 M680 214 V190 M692 214 V188 M704 214 V190"/><path d="M436 196 H470 M592 196 H626 M676 196 H712" /></g>
+        <!-- pumpkins -->
+        <circle cx="190" cy="206" r="26" fill="url(#pglow)"/><circle cx="455" cy="214" r="22" fill="url(#pglow)"/>
+        <g><ellipse cx="190" cy="208" rx="13" ry="10" fill="#E8751A"/><path d="M190 198 q1 -5 4 -6" stroke="#4B7A2A" stroke-width="2" fill="none"/><path d="M184 205 l3 -3 l2 3z M193 205 l3 -3 l2 3z M184 211 q6 4 12 0 l-2 2 l-2 -1 l-2 1 l-2 -1z" fill="#3A1400"/></g>
+        <g><ellipse cx="455" cy="216" rx="10" ry="8" fill="#E8751A"/><path d="M455 208 q1 -4 3 -5" stroke="#4B7A2A" stroke-width="2" fill="none"/><path d="M450 214 l2 -2.5 l2 2.5z M457 214 l2 -2.5 l2 2.5z M450 218 q5 3 10 0z" fill="#3A1400"/></g>
+        <!-- bats -->
+        <g class="flyer b1"><g class="flap"><use href="#i-bat" width="26" height="26" style="color:#07050A"/></g></g>
+        <g class="flyer b2"><g class="flap"><use href="#i-bat" width="18" height="18" style="color:#07050A"/></g></g>
+        <g class="flyer b3"><g class="flap"><use href="#i-bat" width="22" height="22" style="color:#07050A"/></g></g>
+      </svg>
+      <svg class="ghostfloat" viewBox="0 0 32 32" aria-hidden="true"><use href="#i-ghost"/></svg>
+      <div class="fog"></div><div class="fog f2"></div>
+    </div>
+    <div class="titlebar">
+      <div>
+        <h1>Escape the<br>Radical Manor</h1>
+        <p class="sub">Solve by square roots. Rationalize every denominator. Collect all five treasures to escape.</p>
+      </div>
+      <div class="sound" aria-label="Sound">
+        <button class="tog" id="musicTog" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18V5l11-2v13" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="6" cy="18" r="3" fill="currentColor"/><circle cx="17" cy="16" r="3" fill="currentColor"/></svg><span>Music off</span></button>
+        <button class="tog" id="fxTog" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><path d="M16 8a5 5 0 0 1 0 8M19 5a9 9 0 0 1 0 14" fill="none" stroke="currentColor" stroke-width="2"/></svg><span>Sounds off</span></button>
+      </div>
+    </div>
+  </header>
+
+  <div class="inv" id="inv" hidden><span class="lbl">Treasures</span></div>
+
+  <!-- START -->
+  <section class="card" id="vStart">
+    <p class="eyebrow">Before you enter</p>
+    <p class="story">You took a shortcut through the old Radical Manor on Halloween night. The door locked behind you. Every room is sealed by a lock that only opens for a fully simplified answer with no radicals in the denominator.</p>
+    <p class="eyebrow">Example lock</p>
+    <div class="eq">3<i>x</i><sup>2</sup> = 5</div>
+    <p class="center" style="margin:0">Opens with <span class="m"><i>x</i> = ±<span class="fr"><span class="nu">√<span class="rad">15</span></span><span class="de">3</span></span></span>, not <span class="m">±√<span class="rad"><span class="fr"><span class="nu">5</span><span class="de">3</span></span></span></span> and not <span class="m">±<span class="fr"><span class="nu">√<span class="rad">5</span></span><span class="de">√<span class="rad">3</span></span></span></span></p>
+    <p class="small">There's no timer. If you're stuck, ask the ghost for a hint, read the spellbook, or warm up in the Pumpkin Patch.</p>
+    <div class="field">
+      <label for="nameIn">Your first and last name</label>
+      <input type="text" id="nameIn" autocomplete="name" placeholder="First Last">
+    </div>
+    <p class="small" id="nameMsg" hidden style="color:var(--blood)">Type your first and last name so your escape code matches you.</p>
+    <div class="actions"><button class="btn primary" id="startBtn"><svg><use href="#i-door"/></svg>Enter the manor</button></div>
+  </section>
+
+  <!-- HALL -->
+  <section class="card" id="vHall" hidden>
+    <p class="eyebrow">The Grand Hall</p>
+    <h2>Pick a door</h2>
+    <p class="story" id="hallStory"></p>
+    <div class="doors" id="doors"></div>
+  </section>
+
+  <!-- SOLVER (rooms + patch) -->
+  <section class="card" id="vSolve" hidden>
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+      <p class="eyebrow" id="solveEyebrow"></p>
+      <button class="btn quiet" id="toHall" style="padding:6px 12px;font-size:14px">← Grand Hall</button>
+    </div>
+    <h2 id="solveTitle"></h2>
+    <div class="roomart" id="roomArt" aria-hidden="true"></div>
+    <p class="story" id="solveStory"></p>
+    <div class="types" id="types" hidden></div>
+    <div class="lock">
+      <div class="eq pop" id="eq"></div>
+      <div class="answers">
+        <label for="a1"><i>x</i> =</label><input type="text" id="a1" autocomplete="off" spellcheck="false">
+        <label for="a2">or <i>x</i> =</label><input type="text" id="a2" autocomplete="off" spellcheck="false">
+      </div>
+      <div class="keys" aria-label="Insert symbol">
+        <button class="key" data-ins="√">√</button><button class="key" data-ins="/">/</button><button class="key" data-ins="(">(</button><button class="key" data-ins=")">)</button><button class="key" data-ins="i"><i>i</i></button><button class="key" data-ins="±">±</button><button class="key" data-ins="−">−</button>
+      </div>
+      <p class="tip">Type <span class="m">√15/3</span> for <span class="m"><span class="fr"><span class="nu">√<span class="rad">15</span></span><span class="de">3</span></span></span>, or <span class="m">2+√6/3</span>, or <span class="m">(6−√6)/3</span>. Using ± fills both boxes.</p>
+    </div>
+    <div class="actions">
+      <button class="btn primary" id="checkBtn"><svg><use href="#i-key"/></svg>Try the lock</button>
+      <button class="btn ghost" id="helpBtn"><svg><use href="#i-ghost"/></svg>Ask the ghost</button>
+      <button class="btn ghost" id="bookBtn"><svg><use href="#i-book"/></svg>Spellbook</button>
+      <button class="btn ghost" id="patchBtn"><svg><use href="#i-pumpkin"/></svg>Pumpkin Patch</button>
+    </div>
+    <div class="hintbox" id="hints" hidden></div>
+    <div id="fb"></div>
+  </section>
+
+  <!-- ESCAPED -->
+  <section id="vDone" hidden>
+    <div class="cert pop">
+      <div class="roomart" id="certArt" aria-hidden="true"></div>
+      <p class="eyebrow">Certificate of Escape</p>
+      <div class="big">Escaped!</div>
+      <p class="small">This certifies that</p>
+      <p class="nm" id="cName"></p>
+      <p style="margin:0">escaped the Radical Manor by solving five quadratic locks with rationalized denominators.</p>
+      <div class="certitems" id="cItems"></div>
+      <p class="small">Escape code</p>
+      <div class="codebox" id="cCode"></div>
+      <div class="stats"><span>Date <b id="cDate"></b></span><span>Lock attempts <b id="cAtt"></b></span><span>Ghost hints <b id="cHints"></b></span></div>
+    </div>
+    <div class="actions" style="margin-top:14px">
+      <button class="btn primary" id="againBtn"><svg><use href="#i-door"/></svg>Play again</button>
+      <button class="btn ghost" id="copyBtn">Copy code</button>
+      <button class="btn ghost" id="patchBtn2"><svg><use href="#i-pumpkin"/></svg>More practice in the Pumpkin Patch</button>
+    </div>
+    <div class="fb note" id="againConfirm" hidden style="margin-top:14px">
+      <p>Play again with new locks? Write down or send your escape code first. Your code stays the same, but this certificate is cleared until you escape again.</p>
+      <div class="actions"><button class="btn primary" id="againYes">Yes, play again</button><button class="btn quiet" id="againNo">Cancel</button></div>
+    </div>
+    <p class="small center" style="margin-top:10px">Show this certificate or send the code to your teacher.</p>
+  </section>
+
+  <!-- TEACHER -->
+  <section class="card" id="vTeach" hidden>
+    <p class="eyebrow">Teacher check</p>
+    <p style="margin:0">Enter the student's name as they typed it (capitals and spaces don't matter) and the escape code.</p>
+    <div class="field"><label for="tName">Student name</label><input type="text" id="tName" autocomplete="off"></div>
+    <div class="field"><label for="tCode">Escape code</label><input type="text" id="tCode" autocomplete="off"></div>
+    <div class="actions"><button class="btn primary" id="tBtn">Verify</button><button class="btn quiet" id="tClose">Close</button></div>
+    <div id="tOut"></div>
+  </section>
+
+  <div class="foot">
+    <span id="who"></span>
+    <span style="display:flex;gap:16px"><button class="link" id="resetBtn" hidden>Start over</button><button class="link" id="teachBtn">Teacher</button></span>
+  </div>
+  <div class="fb note" id="resetConfirm" hidden>
+    <p>Start over? Your treasures on this device will be lost.</p>
+    <div class="actions"><button class="btn primary" id="resetYes">Yes, start over</button><button class="btn quiet" id="resetNo">Cancel</button></div>
+  </div>
+</div>
+
+<!-- SPELLBOOK -->
+<div class="overlay" id="book" hidden role="dialog" aria-modal="true" aria-labelledby="bookTitle">
+  <div class="card">
+    <p class="eyebrow">The Ghost's Spellbook</p>
+    <h2 id="bookTitle">Breaking a radical lock</h2>
+    <div class="step"><span class="n">Spell 1 · Isolate</span><p>Get the squared part alone. Undo the + or − first, then divide by the number in front.</p><span class="m">2(<i>x</i> − 1)<sup>2</sup> + 4 = 10 &nbsp;→&nbsp; (<i>x</i> − 1)<sup>2</sup> = 3</span></div>
+    <div class="step"><span class="n">Spell 2 · Root with ±</span><p>Take the square root of both sides. Always write ±, because there are two answers.</p><span class="m">3<i>x</i><sup>2</sup> = 5 &nbsp;→&nbsp; <i>x</i><sup>2</sup> = <span class="fr"><span>5</span><span class="de">3</span></span> &nbsp;→&nbsp; <i>x</i> = ±√<span class="rad"><span class="fr"><span>5</span><span class="de">3</span></span></span></span></div>
+    <div class="step"><span class="n">Spell 3 · Split the root</span><p>The root of a fraction is the root of the top over the root of the bottom.</p><span class="m">√<span class="rad"><span class="fr"><span>5</span><span class="de">3</span></span></span> = <span class="fr"><span>√<span class="rad">5</span></span><span class="de">√<span class="rad">3</span></span></span></span></div>
+    <div class="step"><span class="n">Spell 4 · Rationalize</span><p>A radical can't stay in the denominator. Multiply the top and bottom by that same radical. The bottom becomes a whole number because √3 · √3 = 3.</p><span class="m"><span class="fr"><span>√<span class="rad">5</span></span><span class="de">√<span class="rad">3</span></span></span> · <span class="fr"><span>√<span class="rad">3</span></span><span class="de">√<span class="rad">3</span></span></span> = <span class="fr"><span>√<span class="rad">15</span></span><span class="de">3</span></span></span></div>
+    <div class="step"><span class="n">Spell 5 · Simplify and reduce</span><p>Pull perfect squares out of the radical, then reduce the fraction if the numbers share a factor.</p><span class="m"><span class="fr"><span>√<span class="rad">12</span></span><span class="de">4</span></span> = <span class="fr"><span>2√<span class="rad">3</span></span><span class="de">4</span></span> = <span class="fr"><span>√<span class="rad">3</span></span><span class="de">2</span></span></span></div>
+    <div class="step"><span class="n">Crypt spell · Negative under the root</span><p>If the number under the root is negative, pull out √(−1) = <i>i</i>, then keep going.</p><span class="m">√<span class="rad">−<span class="fr"><span>5</span><span class="de">3</span></span></span> = <i>i</i>√<span class="rad"><span class="fr"><span>5</span><span class="de">3</span></span></span> = <span class="fr"><span><i>i</i>√<span class="rad">15</span></span><span class="de">3</span></span></span></div>
+    <div class="step"><span class="n">Typing tips</span><p>√15/3 means √15 over 3. Write 2 + √15/3 or (6 + √15)/3. Write <i>i</i>√15/3 for imaginary answers. Type ± once to fill both boxes.</p></div>
+    <div class="actions"><button class="btn primary" id="bookClose">Close the spellbook</button></div>
+  </div>
+</div>
+
+<script>
+(function(){
+const $=id=>document.getElementById(id);
+const ri=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const nonzero=(a,b)=>{let v=0;while(v===0)v=ri(a,b);return v};
+const gcd=(a,b)=>{a=Math.abs(a);b=Math.abs(b);while(b){[a,b]=[b,a%b]}return a};
+const isSq=n=>n>=0&&Number.isInteger(Math.sqrt(n));
+const M='−', sn=n=>n<0?M+Math.abs(n):String(n);
+const icon=(id)=>`<svg aria-hidden="true"><use href="#i-${id}"/></svg>`;
+
+const ROOMS=[
+ {name:'The Front Hall',type:'A',item:'key',itemName:'Rusty Key',story:'Cobwebs drape the coat rack. A rusty padlock seals the hall door, and an equation is scratched into its face.'},
+ {name:'The Library',type:'B',item:'candle',itemName:'Black Candle',story:'Books whisper on the shelves. A black candle sits in a locked glass case. The riddle on the glass has one extra number to deal with first.'},
+ {name:'The Kitchen',type:'C',item:'potion',itemName:'Green Potion',story:'A cauldron bubbles by itself. The recipe card is missing one ingredient: the value of x.'},
+ {name:'The Attic',type:'D',item:'bat',itemName:'Silver Bat',story:'Bats rustle in the rafters. An old trunk with a combination lock blocks the way, and its riddle is the trickiest yet.'},
+ {name:'The Crypt',type:'E',item:'skull',itemName:'Crystal Skull',story:'Cold air rises from the stone stairs. The final lock only answers to imaginary numbers.'}
+];
+const TYPE_LABEL={A:'a<i>x</i><sup>2</sup> = b',B:'a<i>x</i><sup>2</sup> + k = c',C:'a(<i>x</i> − h)<sup>2</sup> = b',D:'a(<i>x</i> − h)<sup>2</sup> + k = c',E:'imaginary'};
+
+/* ---------- state ---------- */
+const fresh=()=>({name:'',solved:0,attempts:0,hints:0,escaped:false,doneDate:'',room:{prob:null,shown:0,locked:false},patch:{type:'A',prob:null,shown:0,locked:false},view:'start'});
+let S=fresh();
+let mode='room';
+const KEY='radical-manor-v1';
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+function load(){try{const t=localStorage.getItem(KEY);if(t)S=Object.assign(fresh(),JSON.parse(t))}catch(e){}}
+
+/* ---------- problems ---------- */
+function simplifyRad(m){let c=1;for(let d=2;d*d<=m;d++){while(m%(d*d)===0){m/=d*d;c*=d}}return{c,s:m}}
+function gen(type,prev){
+  let P,tries=0;
+  do{
+    const r=pick([2,3,5,6,7,8,10,11,12]);
+    let p;do{p=ri(1,12)}while(gcd(p,r)!==1);
+    const t=pick(r>=8?[1,1]:[1,1,2,3]);
+    const imag=type==='E';
+    let sa=1,sb=1;
+    if(imag){if(Math.random()<0.5)sb=-1;else sa=-1}else if(Math.random()<0.2){sa=-1;sb=-1}
+    const a=sa*r*t,b=sb*p*t;
+    const h=(type==='A'||type==='B')?0:nonzero(-7,7);
+    let k=0;if(type==='B'||type==='D')k=nonzero(-15,15);if(type==='E'&&Math.random()<0.5)k=nonzero(-12,12);
+    const {c:c0,s}=simplifyRad(p*r);const g=gcd(c0,r);
+    P={type,a,b,h,k,rhs:b+k,p,r,t,imag,c0,s,c:c0/g,d:r/g,g};
+    tries++;
+  }while(prev&&tries<20&&prev.a===P.a&&prev.b===P.b&&prev.h===P.h);
+  return P;
+}
+function mag(P){return P.c*Math.sqrt(P.s)/P.d}
+function expected(P){const v=mag(P);return P.imag?[{re:P.h,im:v},{re:P.h,im:-v}]:[{re:P.h+v,im:0},{re:P.h-v,im:0}]}
+
+/* ---------- formatting ---------- */
+const X='<i>x</i>';
+const fr=(n,d)=>`<span class="fr"><span>${n}</span><span class="de">${d}</span></span>`;
+const rt=x=>`√<span class="rad">${x}</span>`;
+function lin(h){return h===0?X:h>0?`${X} ${M} ${h}`:`${X} + ${-h}`}
+function sq(a,h){const coef=a===1?'':a===-1?M:sn(a);return coef+(h===0?X:`(${lin(h)})`)+'<sup>2</sup>'}
+function eqHTML(P){let l=sq(P.a,P.h);if(P.k)l+=P.k>0?` + ${P.k}`:` ${M} ${-P.k}`;return `${l} = ${sn(P.rhs)}`}
+function radH(c,s,imag){return (c===1?'':c)+(imag?'<i>i</i>':'')+rt(s)}
+function core(P){return fr(radH(P.c,P.s,P.imag),P.d)}
+function plusMinus(P){return P.h===0?`±${core(P)}`:`${sn(P.h)} ± ${core(P)}`}
+function bothAns(P){const c=core(P);return P.h===0?[c,M+c]:[`${sn(P.h)} + ${c}`,`${sn(P.h)} ${M} ${c}`]}
+function sfrac(n,d){const neg=(n<0)!==(d<0);return (neg?M:'')+fr(Math.abs(n),Math.abs(d))}
+function steps(P){
+  const st=[],L=P.h===0?X:lin(P.h),ip=P.imag?'<i>i</i>':'';
+  const qF=(P.imag?M:'')+fr(P.p,P.r);
+  if(P.k)st.push({t:P.k>0?`Subtract ${P.k} from both sides to get the squared part alone.`:`Add ${-P.k} to both sides to get the squared part alone.`,e:`${sq(P.a,P.h)} = ${sn(P.b)}`});
+  const reduced=Math.abs(P.b)!==P.p||Math.abs(P.a)!==P.r;
+  st.push({t:`Divide both sides by ${sn(P.a)}.${reduced?' Simplify the fraction.':''}`,e:`${sq(1,P.h)} = ${sfrac(P.b,P.a)}${reduced?' = '+qF:''}`});
+  st.push({t:'Take the square root of both sides. Remember the ±.',e:`${L} = ±${rt(qF)}`});
+  if(P.imag)st.push({t:'The number under the root is negative, so pull out √(−1) = <i>i</i>.',e:`${L} = ±<i>i</i>${rt(fr(P.p,P.r))}`});
+  const sp=Math.sqrt(P.p),bot=rt(P.r);
+  const top=isSq(P.p)?(P.imag?(sp===1?'':sp)+'<i>i</i>':String(sp)):radH(1,P.p,P.imag);
+  st.push({t:'Split the root of the fraction into a root on top over a root on the bottom.',e:`${L} = ±${fr(top,bot)}`});
+  const prod=isSq(P.p)?radH(sp,P.r,P.imag):radH(1,P.p*P.r,P.imag);
+  st.push({t:`A radical can't stay in the denominator. Multiply top and bottom by ${bot}. Since ${bot} · ${bot} = ${P.r}, the bottom becomes a whole number.`,e:`${L} = ±${fr(top+' · '+bot,bot+' · '+bot)} = ±${fr(prod,P.r)}`});
+  const shownCoef=isSq(P.p)?Math.sqrt(P.p):1, shownRad=isSq(P.p)?P.r:P.p*P.r;
+  const needSimp=P.c0!==shownCoef||P.s!==shownRad;
+  if(needSimp)st.push({t:`Simplify the radical: ${radH(shownCoef,shownRad,false)} = ${radH(P.c0,P.s,false)}.`,e:`${L} = ±${fr(radH(P.c0,P.s,P.imag),P.r)}`});
+  if(P.g>1)st.push({t:`Reduce: ${P.c0} and ${P.r} share a factor of ${P.g}.`,e:`${L} = ±${core(P)}`});
+  else if(!needSimp)st.push({t:'Check: the radical is simplified and the fraction is reduced.',e:`${L} = ±${core(P)}`});
+  if(P.h!==0)st.push({t:P.h>0?`Add ${P.h} to both sides.`:`Subtract ${-P.h} from both sides.`,e:`${X} = ${plusMinus(P)}`});
+  const [A,B]=bothAns(P);
+  st.push({t:'Split the ± into two solutions.',e:`${X} = ${A} &nbsp;or&nbsp; ${X} = ${B}`});
+  return st;
+}
+const stepHTML=(s,i)=>`<div class="step"><span class="n">Step ${i+1}</span><p>${s.t}</p><span class="m">${s.e}</span></div>`;
+
+/* ---------- parse student answers ---------- */
+const C={add:(a,b)=>({re:a.re+b.re,im:a.im+b.im}),sub:(a,b)=>({re:a.re-b.re,im:a.im-b.im}),
+  mul:(a,b)=>({re:a.re*b.re-a.im*b.im,im:a.re*b.im+a.im*b.re}),
+  div:(a,b)=>{const d=b.re*b.re+b.im*b.im;if(d===0)throw 0;return{re:(a.re*b.re+a.im*b.im)/d,im:(a.im*b.re-a.re*b.im)/d}},
+  sqrt:a=>{const r=Math.hypot(a.re,a.im);const re=Math.sqrt((r+a.re)/2);let im=Math.sqrt(Math.max(0,(r-a.re)/2));if(a.im<0)im=-im;return{re,im}},
+  neg:a=>({re:-a.re,im:-a.im})};
+function clean(s){return s.toLowerCase().replace(/\s+/g,'').replace(/[−–—]/g,'-').replace(/[×·]/g,'*').replace(/÷/g,'/').replace(/sqrt/g,'√').replace(/^x=/,'').replace(/\+\/-|\+-/g,'±')}
+function parse(str){
+  const toks=[];let i=0;
+  while(i<str.length){const num=/^(\d+\.?\d*|\.\d+)/.exec(str.slice(i));
+    if(num){toks.push({t:'n',v:parseFloat(num[0])});i+=num[0].length;continue}
+    if('+-*/()√i'.includes(str[i])){toks.push({t:str[i]});i++;continue}throw 0}
+  let pos=0;const peek=()=>toks[pos],next=()=>toks[pos++];
+  function primary(){const t=next();if(!t)throw 0;
+    if(t.t==='n')return{op:'n',v:t.v};if(t.t==='i')return{op:'i'};
+    if(t.t==='√')return{op:'sqrt',a:primary()};
+    if(t.t==='('){const v=expr();const c=next();if(!c||c.t!==')')throw 0;return v}throw 0}
+  function unary(){const t=peek();if(t&&t.t==='-'){next();return{op:'neg',a:unary()}}if(t&&t.t==='+'){next();return unary()}return primary()}
+  function term(){let v=unary();for(;;){const t=peek();if(!t)break;
+    if(t.t==='*'){next();v={op:'*',a:v,b:unary()}}else if(t.t==='/'){next();v={op:'/',a:v,b:unary()}}
+    else if(['n','i','√','('].includes(t.t))v={op:'*',a:v,b:primary()};else break}return v}
+  function expr(){let v=term();for(;;){const t=peek();if(t&&t.t==='+'){next();v={op:'+',a:v,b:term()}}else if(t&&t.t==='-'){next();v={op:'-',a:v,b:term()}}else break}return v}
+  const v=expr();if(pos!==toks.length)throw 0;return v;
+}
+function ev(n){switch(n.op){case'n':return{re:n.v,im:0};case'i':return{re:0,im:1};case'sqrt':return C.sqrt(ev(n.a));case'neg':return C.neg(ev(n.a));
+  case'+':return C.add(ev(n.a),ev(n.b));case'-':return C.sub(ev(n.a),ev(n.b));case'*':return C.mul(ev(n.a),ev(n.b));case'/':return C.div(ev(n.a),ev(n.b))}}
+const has=(n,op)=>!!n&&(n.op===op||has(n.a,op)||has(n.b,op));
+function mono(n){if(n.op==='n')return Number.isInteger(n.v)?n.v:null;if(n.op==='i'||n.op==='sqrt')return 1;if(n.op==='neg'){const m=mono(n.a);return m===null?null:-m}
+  if(n.op==='*'){const x=mono(n.a),y=mono(n.b);return x===null||y===null?null:x*y}return null}
+function linC(n){if(n.op==='+'||n.op==='-'){const x=linC(n.a),y=linC(n.b);return x&&y?x.concat(y):null}if(n.op==='neg')return linC(n.a);const m=mono(n);return m===null?null:[m]}
+function formIssue(n){
+  let issue=null;const set=(k)=>{const rank={rationalize:3,simplify:2,reduce:1};if(!issue||rank[k]>rank[issue])issue=k};
+  (function walk(x){if(!x)return;
+    if(x.op==='/'&&has(x.b,'sqrt'))set('rationalize');
+    if(x.op==='sqrt'){const v=ev(x.a);
+      if(has(x.a,'/')||Math.abs(v.im)>1e-9||!Number.isInteger(Math.round(v.re*1e9)/1e9))set(has(x.a,'/')?'rationalize':'simplify');
+      else{const m=Math.abs(Math.round(v.re));if(m>1&&simplifyRad(m).c>1)set('simplify');if(m<=1)set('simplify')}}
+    if(x.op==='/'&&!has(x.b,'sqrt')){const d=x.b.op==='n'?x.b.v:(x.b.op==='neg'&&x.b.a.op==='n'?x.b.a.v:null);const L=linC(x.a);
+      if(d&&Number.isInteger(d)&&L&&L.length){const g=L.reduce((acc,v)=>gcd(acc,v),Math.abs(d));if(g>1)set('reduce')}}
+    walk(x.a);walk(x.b)})(n);
+  return issue;
+}
+const hasDecimal=n=>!!n&&((n.op==='n'&&!Number.isInteger(n.v))||hasDecimal(n.a)||hasDecimal(n.b));
+function readAnswers(){
+  const raws=[clean($('a1').value),clean($('a2').value)].filter(Boolean),out=[];
+  for(const r of raws){const parts=r.includes('±')?[r.replace('±','+'),r.replace('±','-')]:[r];
+    for(const q of parts){let ast;try{ast=parse(q);ev(ast)}catch(e){throw r}out.push({ast,v:ev(ast)})}}
+  return out;
+}
+const close=(a,b,tol=1e-6)=>Math.abs(a.re-b.re)<tol&&Math.abs(a.im-b.im)<tol;
+const setEq=(u,e,tol)=>u.length===2&&((close(u[0],e[0],tol)&&close(u[1],e[1],tol))||(close(u[0],e[1],tol)&&close(u[1],e[0],tol)));
+const pmSet=(h,w)=>[{re:h+w.re,im:w.im},{re:h-w.re,im:-w.im}];
+
+function diagnose(P,u){
+  const e=expected(P);
+  if(u.length===1||(u.length===2&&close(u[0],u[1]))){if(e.some(x=>close(x,u[0])))return 'You found one of the two solutions. Taking a square root gives <b>±</b>, so there are two answers.'}
+  if(u.length>2)return 'Enter exactly two solutions.';
+  const v=mag(P);
+  if(P.h!==0&&setEq(u,P.imag?pmSet(-P.h,{re:0,im:v}):pmSet(-P.h,{re:v,im:0})))return `Check the sign at the end. In ${sq(1,P.h)}, you ${P.h>0?'add':'subtract'} ${Math.abs(P.h)} to both sides, so the answer starts with ${sn(P.h)}.`;
+  if(P.imag&&setEq(u,pmSet(P.h,{re:v,im:0})))return 'So close! The squared part equals a <b>negative</b> number, so your answer needs an <i>i</i>.';
+  if(setEq(u,pmSet(P.h,C.sqrt({re:(P.imag?-1:1)*P.r/P.p,im:0}))))return 'It looks like the fraction got flipped. Divide by the number in front, so it ends up on the bottom.';
+  if(Math.abs(P.a)!==1&&setEq(u,pmSet(P.h,C.sqrt({re:P.b,im:0}))))return `It looks like you took the square root before dividing by ${sn(P.a)}. Get the squared part completely alone first.`;
+  if(P.k&&setEq(u,pmSet(P.h,C.sqrt({re:P.rhs/P.a,im:0}))))return `Deal with the ${sn(P.k)} first. Move it to the other side before you divide.`;
+  return 'Compare your work with the ghost\'s steps below to see where it went a different way.';
+}
+
+/* ---------- code ---------- */
+function cyrb53(str,seed=0){let h1=0xdeadbeef^seed,h2=0x41c6ce57^seed;for(let i=0;i<str.length;i++){const ch=str.charCodeAt(i);h1=Math.imul(h1^ch,2654435761);h2=Math.imul(h2^ch,1597334677)}
+  h1=Math.imul(h1^(h1>>>16),2246822507);h1^=Math.imul(h2^(h2>>>13),3266489909);h2=Math.imul(h2^(h2>>>16),2246822507);h2^=Math.imul(h1^(h1>>>13),3266489909);return 4294967296*(2097151&h2)+(h1>>>0)}
+const normName=n=>n.toLowerCase().replace(/[^a-z]/g,'');
+function makeCode(name){const AL='ABCDEFGHJKMNPQRSTUVWXYZ23456789';let h=cyrb53(normName(name)+'|radical-manor|boo',13);let s='';for(let i=0;i<6;i++){s+=AL[h%AL.length];h=Math.floor(h/AL.length)}return s.slice(0,3)+'-'+s.slice(3)}
+
+/* ---------- views ---------- */
+function show(v){S.view=v;['vStart','vHall','vSolve','vDone'].forEach(id=>$(id).hidden=id!=='v'+v[0].toUpperCase()+v.slice(1));
+  $('inv').hidden=!S.name;$('resetBtn').hidden=!S.name;$('who').textContent=S.name?'Exploring as '+S.name:'';renderInv();save();window.scrollTo({top:0})}
+function renderInv(){const el=$('inv'),have=S.solved-(S.hunting?1:0);el.innerHTML='<span class="lbl">Treasures</span>'+ROOMS.map((r,i)=>`<span class="slot ${i<have?'got':''}" title="${i<have?r.itemName:'Not found yet'}">${icon(r.item)}</span>`).join('')}
+function renderHall(){
+  $('hallStory').textContent=S.solved===0?'Five locked doors stand around you. Only the first one will budge.':S.solved<5?`You have ${S.solved} of 5 treasures. The next door is glowing.`:'All five treasures found.';
+  const d=$('doors');d.innerHTML=ROOMS.map((r,i)=>{const st=i<S.solved?'done':i===S.solved?'open':'locked';
+    const lbl=st==='done'?'Treasure found':st==='open'?'Enter':'Locked';
+    return `<button class="door ${st}" data-room="${i}" ${st!=='open'?'aria-disabled="true"':''}>${icon(st==='locked'?'door':r.item)}<span class="rn">${r.name}</span><span class="st">${lbl}</span></button>`}).join('')
+  +`<button class="door side" data-side="patch">${icon('pumpkin')}<span class="rn">Pumpkin Patch</span><span class="st">Extra practice. Doesn't count, can't hurt.</span></button>`
+  +`<button class="door side" data-side="book">${icon('book')}<span class="rn">Spellbook</span><span class="st">How to rationalize, step by step.</span></button>`;
+  d.querySelectorAll('[data-room]').forEach(b=>b.onclick=()=>{if(+b.dataset.room===S.solved)enterRoom()});
+  d.querySelector('[data-side=patch]').onclick=enterPatch;d.querySelector('[data-side=book]').onclick=openBook;
+}
+function ctx(){return mode==='room'?S.room:S.patch}
+function curType(){return mode==='room'?ROOMS[S.solved].type:S.patch.type}
+function enterRoom(){mode='room';sfx('creak');if(!S.room.prob||S.room.locked){S.room.prob=gen(curType(),S.room.prob);S.room.shown=0;S.room.locked=false}show('solve');renderSolve()}
+function enterPatch(){mode='patch';if(!S.patch.prob||S.patch.locked){S.patch.prob=gen(S.patch.type,S.patch.prob);S.patch.shown=0;S.patch.locked=false}show('solve');renderSolve()}
+function renderSolve(){
+  const c=ctx(),P=c.prob;
+  $('roomArt').innerHTML=mode==='room'?ART[ROOMS[S.solved].item]:ART.patch;
+  if(mode==='room'){const r=ROOMS[S.solved];$('solveEyebrow').textContent=`Room ${S.solved+1} of 5 · find the ${r.itemName}`;$('solveTitle').textContent=r.name;$('solveStory').textContent=r.story;$('types').hidden=true;$('patchBtn').hidden=false}
+  else{$('solveEyebrow').textContent='Practice room · nothing here counts against you';$('solveTitle').textContent='The Pumpkin Patch';$('solveStory').textContent='Pick a kind of riddle and practice as much as you like. Your place in the manor is saved.';$('types').hidden=false;$('patchBtn').hidden=true;
+    $('types').innerHTML=Object.keys(TYPE_LABEL).map(k=>`<button class="type" data-t="${k}" aria-pressed="${S.patch.type===k}">${TYPE_LABEL[k]}</button>`).join('');
+    $('types').querySelectorAll('.type').forEach(b=>b.onclick=()=>{S.patch.type=b.dataset.t;S.patch.prob=gen(S.patch.type,S.patch.prob);S.patch.shown=0;S.patch.locked=false;renderSolve();save()})}
+  $('toHall').textContent=S.escaped?'← Certificate':'← Grand Hall';
+  const eq=$('eq');eq.innerHTML=eqHTML(P);eq.classList.remove('pop');void eq.offsetWidth;eq.classList.add('pop');
+  $('a1').value='';$('a2').value='';$('fb').innerHTML='';renderHints();setInputs(!c.locked);updateHelp();save();
+}
+function maxHints(){return Math.max(1,steps(ctx().prob).length-2)}
+function renderHints(){const c=ctx(),h=$('hints');if(!c.shown){h.hidden=true;h.innerHTML='';return}
+  h.hidden=false;h.innerHTML=`<div class="who">${icon('ghost')}The ghost whispers…</div>`+steps(c.prob).slice(0,c.shown).map(stepHTML).join('')}
+function updateHelp(){const c=ctx(),b=$('helpBtn'),left=maxHints()-c.shown;b.disabled=left<=0||c.locked;
+  b.lastChild.textContent=c.shown===0?'Ask the ghost':left>0?'Ask for another hint':'The ghost has said all it can'}
+function setInputs(on){$('checkBtn').disabled=!on;$('a1').disabled=!on;$('a2').disabled=!on;document.querySelectorAll('.key').forEach(k=>k.disabled=!on)}
+function newProb(){const c=ctx();c.prob=gen(curType(),c.prob);c.shown=0;c.locked=false;renderSolve();setTimeout(()=>$('a1').focus(),50)}
+
+function check(){
+  const c=ctx();if(c.locked)return;
+  let u;try{u=readAnswers()}catch(bad){$('fb').innerHTML=`<div class="fb note"><p>The lock can't read <b>${String(bad).replace(/[<>&]/g,'')}</b>. Try something like <span class="m">√15/3</span>, <span class="m">2−√6/3</span>, or <span class="m">i√10/2</span>.</p></div>`;return}
+  if(!u.length){$('fb').innerHTML='<div class="fb note"><p>Type your two solutions into the lock first.</p></div>';return}
+  const P=c.prob,e=expected(P),vals=u.map(x=>x.v);
+  if(mode==='room')S.attempts++;
+  if(setEq(vals,e)){
+    const issues=u.map(x=>formIssue(x.ast)).filter(Boolean);
+    if(issues.length){const k=issues.includes('rationalize')?'rationalize':issues.includes('simplify')?'simplify':'reduce';
+      const msg={rationalize:'Your value is right, but there\'s still a radical in a denominator (or a root of a fraction). Rationalize the denominator, then try again.',
+        simplify:'Your value is right, but a radical can still be simplified. Pull out any perfect-square factors, then try again.',
+        reduce:'Your value is right, but the fraction can still be reduced. Divide the top and bottom by their common factor, then try again.'}[k];
+      sfx('hmm');$('fb').innerHTML=`<div class="fb note pop"><h3>The lock creaks…</h3><p>${msg}</p></div>`;save();return}
+    c.locked=true;setInputs(false);updateHelp();
+    const [A,B]=bothAns(P);
+    if(mode==='room'){
+      const r=ROOMS[S.solved];S.solved++;S.room.prob=null;S.room.locked=false;S.room.shown=0;
+      const last=S.solved===5;if(last){S.escaped=true;S.doneDate=new Date().toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'})}
+      S.hunting=true;save();sfx('unlock');batBurst(true);
+      $('fb').innerHTML=`<div class="fb good pop"><h3>Click! The lock falls open.</h3><p><span class="m">${X} = ${A}</span> or <span class="m">${X} = ${B}</span></p><p>The <b>${r.itemName}</b> is hidden somewhere in ${r.name.replace('The','the')}. Move things around to find it.</p><div class="search" id="search"></div><div id="afterFind"></div></div>`;
+      buildSearch(r,last);
+    }else{
+      save();sfx('unlock');batBurst(true);$('fb').innerHTML=`<div class="fb good pop"><h3>Pumpkin-perfect!</h3><p><span class="m">${X} = ${A}</span> or <span class="m">${X} = ${B}</span></p><div class="actions"><button class="btn primary" id="goNext">Another one</button></div></div>`;
+      $('goNext').onclick=newProb;$('goNext').focus();
+    }
+    return;
+  }
+  if(u.some(x=>hasDecimal(x.ast))&&setEq(vals,e,0.01)){$('fb').innerHTML='<div class="fb note pop"><h3>Close, but no decimals</h3><p>The lock only accepts exact answers. Keep the radical, like <span class="m">√15/3</span>, instead of rounding.</p></div>';if(mode==='room')S.attempts--;return}
+  c.locked=true;setInputs(false);updateHelp();save();
+  sfx('rattle');const why=diagnose(P,vals),[A,B]=bothAns(P);
+  $('fb').innerHTML=`<div class="fb bad pop"><h3>The lock rattles but holds</h3><p>${why}</p><p>This lock opened with <span class="m">${X} = ${A}</span> and <span class="m">${X} = ${B}</span>.</p><div class="hints">${steps(P).map(stepHTML).join('')}</div><div class="actions"><button class="btn primary" id="goNext">${mode==='room'?'The lock changes… try the new one':'Try a similar one'}</button>${mode==='room'?'<button class="btn ghost" id="goPatch">Practice in the Pumpkin Patch first</button>':''}</div></div>`;
+  $('hints').hidden=true;
+  $('goNext').onclick=newProb;if($('goPatch'))$('goPatch').onclick=()=>{S.patch.type=P.type;S.patch.prob=null;enterPatch()};$('goNext').focus();
+}
+function showDone(){S.hunting=false;show('done');$('certArt').innerHTML=ART.escape;$('cName').textContent=S.name;$('cCode').textContent=makeCode(S.name);$('cDate').textContent=S.doneDate;$('cAtt').textContent=S.attempts;$('cHints').textContent=S.hints;
+  $('cItems').innerHTML=ROOMS.map(r=>`<span title="${r.itemName}">${icon(r.item)}</span>`).join('')}
+let lastFocus=null;
+function openBook(){lastFocus=document.activeElement;$('book').hidden=false;$('bookClose').focus()}
+function closeBook(){$('book').hidden=true;if(lastFocus)lastFocus.focus()}
+
+/* ---------- events ---------- */
+let lastInput=$('a1');
+['a1','a2'].forEach(id=>{const el=$(id);el.addEventListener('focus',()=>lastInput=el);el.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();check()}})});
+document.querySelectorAll('.key').forEach(k=>k.addEventListener('click',()=>{const el=lastInput,ins=k.dataset.ins;const s=el.selectionStart??el.value.length,e=el.selectionEnd??el.value.length;el.value=el.value.slice(0,s)+ins+el.value.slice(e);el.focus();el.setSelectionRange(s+ins.length,s+ins.length)}));
+$('checkBtn').onclick=check;
+$('helpBtn').onclick=()=>{const c=ctx();if(c.shown<maxHints()){sfx('whoosh');c.shown++;if(mode==='room')S.hints++;renderHints();updateHelp();save()}};
+$('bookBtn').onclick=openBook;$('bookClose').onclick=closeBook;
+$('book').addEventListener('click',e=>{if(e.target===$('book'))closeBook()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('book').hidden)closeBook()});
+$('patchBtn').onclick=()=>{S.patch.type=curType();S.patch.prob=null;enterPatch()};
+$('patchBtn2').onclick=()=>{S.patch.prob=null;enterPatch()};
+$('toHall').onclick=()=>{S.hunting=false;if(S.escaped)showDone();else{show('hall');renderHall()}};
+$('startBtn').onclick=()=>{const n=$('nameIn').value.trim().replace(/\s+/g,' ');if(n.split(' ').length<2||normName(n).length<3){$('nameMsg').hidden=false;return}
+  S=fresh();S.name=n;show('hall');renderHall()};
+$('nameIn').addEventListener('keydown',e=>{if(e.key==='Enter')$('startBtn').click()});
+$('copyBtn').onclick=()=>{const t=$('cCode').textContent;const sel=()=>{const r=document.createRange();r.selectNodeContents($('cCode'));const s=getSelection();s.removeAllRanges();s.addRange(r);$('copyBtn').textContent='Selected. Press Ctrl+C'};
+  try{navigator.clipboard.writeText(t).then(()=>{$('copyBtn').textContent='Copied'},sel)}catch(e){sel()}};
+$('resetBtn').onclick=()=>{$('resetConfirm').hidden=false};
+$('againBtn').onclick=()=>{$('againConfirm').hidden=false;$('againYes').focus()};
+$('againNo').onclick=()=>{$('againConfirm').hidden=true};
+$('againYes').onclick=()=>{const n=S.name,pt=S.patch.type;S=fresh();S.name=n;S.patch.type=pt;$('againConfirm').hidden=true;sfx('creak');show('hall');renderHall()};
+$('resetNo').onclick=()=>{$('resetConfirm').hidden=true};
+$('resetYes').onclick=()=>{try{localStorage.removeItem(KEY)}catch(e){}S=fresh();$('resetConfirm').hidden=true;$('nameIn').value='';show('start')};
+$('teachBtn').onclick=()=>{$('vTeach').hidden=!$('vTeach').hidden;if(!$('vTeach').hidden)$('tName').focus()};
+$('tClose').onclick=()=>{$('vTeach').hidden=true};
+$('tBtn').onclick=()=>{const n=$('tName').value,c=$('tCode').value.toUpperCase().replace(/[^A-Z0-9]/g,'');
+  const ok=normName(n).length>0&&makeCode(n).replace('-','')===c;
+  $('tOut').innerHTML=ok?'<div class="fb good"><h3>Valid escape code</h3><p>This code matches that student\'s name.</p></div>':'<div class="fb bad"><h3>No match</h3><p>Check the spelling of the name. The code only works with the name it was earned under.</p></div>'};
+
+/* ---------- room art ---------- */
+const BAT=(x,y,s,c='#07050A',cls='')=>`<g class="flyer ${cls}" style="transform:translate(${x}px,${y}px)"><g class="flap"><use href="#i-bat" width="${s}" height="${s}" style="color:${c}"/></g></g>`;
+const ART={
+ key:`<svg viewBox="0 0 600 140" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><rect width="600" height="140" fill="#1C1226"/><g fill="#24182F">${[0,1,2,3,4,5,6,7,8,9,10,11].map(i=>`<rect x="${i*52}" y="0" width="48" height="140"/>`).join('')}</g>
+  <rect x="0" y="112" width="600" height="28" fill="#120B18"/>
+  <g><rect x="60" y="28" width="70" height="86" rx="4" fill="#5A3B1E"/><rect x="68" y="36" width="54" height="70" fill="#2A2034"/><circle cx="95" cy="62" r="16" fill="#3C2E4A"/><path d="M79 106 q16 -30 32 0z" fill="#3C2E4A"/><g class="eyes"><circle cx="89" cy="61" r="2.4" fill="#FFD36B"/><circle cx="101" cy="61" r="2.4" fill="#FFD36B"/></g></g>
+  <g><rect x="250" y="20" width="100" height="120" rx="50" fill="#3A2416"/><rect x="250" y="70" width="100" height="70" fill="#3A2416"/><path d="M262 140V72a38 38 0 0 1 76 0v68" fill="none" stroke="#24150C" stroke-width="4"/><rect x="286" y="84" width="28" height="24" rx="4" fill="#9A8C7A"/><path d="M291 84v-8a9 9 0 0 1 18 0v8" fill="none" stroke="#9A8C7A" stroke-width="4"/><circle cx="300" cy="94" r="3" fill="#2A1A10"/><rect x="299" y="95" width="2" height="7" fill="#2A1A10"/></g>
+  <g><rect x="460" y="40" width="10" height="72" fill="#2E2238"/><rect x="452" y="108" width="26" height="6" fill="#2E2238"/><rect x="458" y="30" width="14" height="12" fill="#E9DCC3"/><path class="win" d="M465 14c4 5 4 10 0 13c-4 -3 -4 -8 0 -13z" fill="#FFD36B"/><circle cx="465" cy="24" r="30" fill="#FFD36B" opacity=".08"/></g>
+  <g stroke="#6E6080" stroke-width="1" fill="none" opacity=".7"><path d="M600 0 L540 0 M600 0 L548 34 M600 0 L580 52 M600 0 L600 60"/><path d="M556 0 q10 10 26 8 q10 8 18 20 M572 0 q6 14 16 14 q4 10 12 14"/></g>
+  ${BAT(160,20,22,'#07050A','b1')}</svg>`,
+ candle:`<svg viewBox="0 0 600 140" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><rect width="600" height="140" fill="#1A1220"/>
+  ${[0,1,2].map(r=>`<rect x="0" y="${r*44+40}" width="600" height="6" fill="#3A2416"/>`).join('')}
+  ${[0,1,2].map(r=>Array.from({length:30},(_,i)=>{const h=22+((i*7+r*5)%14),w=8+((i*3+r)%8),x=i*20+((r*7)%11);const col=['#5B2333','#2D3E5C','#3D4D2A','#5C4423','#432A55'][(i+r)%5];return `<rect x="${x}" y="${r*44+40-h}" width="${w}" height="${h}" fill="${col}"/>`}).join('')).join('')}
+  <g class="sway" style="transform-origin:50% 100%"><g transform="translate(280 60) rotate(-12)"><rect x="0" y="0" width="44" height="30" rx="2" fill="#7A5A3A"/><path d="M22 0v30" stroke="#4A3220" stroke-width="2"/><path d="M4 6h14M4 12h14M26 6h14M26 12h14" stroke="#E9DCC3" stroke-width="1.5"/></g></g>
+  <circle cx="300" cy="74" r="40" fill="#C9F0FF" opacity=".06"/>
+  <g><rect x="520" y="92" width="12" height="36" fill="#1A1A1A"/><path class="win" d="M526 74c5 6 5 12 0 16c-5 -4 -5 -10 0 -16z" fill="#FFD36B"/><circle cx="526" cy="86" r="34" fill="#FFD36B" opacity=".1"/></g></svg>`,
+ potion:`<svg viewBox="0 0 600 140" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><rect width="600" height="140" fill="#1A1210"/><rect y="118" width="600" height="22" fill="#0E0908"/>
+  <g stroke="#3A2A20" stroke-width="3"><path d="M80 0v34M160 0v24M440 0v30M520 0v22"/></g>
+  <g fill="#4A3A30"><path d="M64 34h32l-4 22h-24z"/><circle cx="160" cy="34" r="12"/><path d="M426 30h28v8h-28z"/><path d="M510 22h20l6 26h-32z"/></g>
+  <g fill="#FF8A1F" opacity=".9"><path class="win" d="M262 126 q8 -26 16 -6 q6 -20 14 -4 q8 -22 16 0 q6 -18 14 6 q8 -14 12 8z"/></g>
+  <circle cx="300" cy="96" r="60" fill="#8EE26C" opacity=".08"/>
+  <path d="M232 70h136l-10 40a56 26 0 0 1-116 0z" fill="#16120F"/><ellipse cx="300" cy="70" rx="72" ry="10" fill="#2A2420"/><ellipse cx="300" cy="70" rx="64" ry="7" fill="#6FC24E"/>
+  <g fill="#9BEA7A"><circle class="bub" cx="280" cy="66" r="5"/><circle class="bub d2" cx="306" cy="64" r="4"/><circle class="bub d3" cx="326" cy="67" r="6"/><circle class="bub d2" cx="292" cy="68" r="3"/></g>
+  <g class="sway" style="transform-origin:0 100%"><rect x="340" y="20" width="5" height="56" fill="#5A4030" transform="rotate(20 342 76)"/></g>
+  <g><path d="M470 100h22v-14l8-12h-38l8 12z" fill="#5B2A6E" opacity=".9"/><rect x="474" y="62" width="14" height="8" fill="#7A5A3A"/><path d="M520 108h18v-26h-18z" fill="#2A5C3A"/><rect x="523" y="74" width="12" height="8" fill="#7A5A3A"/></g></svg>`,
+ bat:`<svg viewBox="0 0 600 140" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><rect width="600" height="140" fill="#18111F"/>
+  <path d="M0 140 L300 6 L600 140" fill="none" stroke="#3A2416" stroke-width="10"/><path d="M60 140 L300 34 L540 140" fill="none" stroke="#2A190F" stroke-width="5"/>
+  <path d="M100 52 H500" stroke="#3A2416" stroke-width="8"/>
+  <circle cx="300" cy="80" r="22" fill="#2B2340"/><circle cx="300" cy="80" r="18" fill="#F7E9BE" opacity=".75"/><path d="M300 58v44M278 80h44" stroke="#18111F" stroke-width="4"/>
+  ${[150,190,410,450,480].map((x,i)=>`<g transform="translate(${x} 56) scale(1 -1)"><use href="#i-bat" x="-10" y="-22" width="20" height="20" style="color:#07050A"/></g>`).join('')}
+  <g><rect x="90" y="96" width="110" height="40" rx="6" fill="#5A3B1E"/><rect x="90" y="96" width="110" height="10" fill="#6E4A26"/><rect x="138" y="108" width="14" height="14" rx="2" fill="#B8A27A"/><path d="M100 96v40M190 96v40" stroke="#3A2416" stroke-width="4"/></g>
+  <g stroke="#6E6080" stroke-width="1" fill="none" opacity=".6"><path d="M0 0 L60 0 M0 0 L52 34 M0 0 L20 52 M0 0 L0 60"/><path d="M44 0 q-10 10 -26 8 q-10 8 -18 20"/></g>
+  <g><path d="M440 130h80l-6 -30h-68z" fill="#2E2238"/><circle cx="480" cy="88" r="14" fill="#DDD3C2"/><circle cx="475" cy="86" r="3.5" fill="#18111F"/><circle cx="485" cy="86" r="3.5" fill="#18111F"/></g>
+  ${BAT(200,30,24,'#07050A','b2')}</svg>`,
+ skull:`<svg viewBox="0 0 600 140" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><rect width="600" height="140" fill="#0F1418"/>
+  <g fill="#1C252B">${Array.from({length:14},(_,i)=>`<rect x="${i*44+(i%2?10:0)}" y="0" width="40" height="22"/><rect x="${i*44+(i%2?0:20)}" y="26" width="40" height="22"/>`).join('')}</g>
+  <path d="M220 140V80a80 70 0 0 1 160 0v60z" fill="#070A0C"/><path d="M220 140V80a80 70 0 0 1 160 0v60" fill="none" stroke="#2C383F" stroke-width="10"/>
+  <path d="M262 132 l14 -40 h48 l14 40z" fill="#3A2416"/><path d="M282 104h36M300 96v22" stroke="#B89B5A" stroke-width="3"/>
+  <g fill="#2A3238"><path d="M60 140v-34a18 18 0 0 1 36 0v34z"/><path d="M120 140v-24h-10v-8h10v-10h8v10h10v8h-10v24z"/><path d="M470 140v-40a20 20 0 0 1 40 0v40z"/><path d="M530 140v-26a14 14 0 0 1 28 0v26z"/></g>
+  <g><path d="M300 30c-14 0-24 10-24 22c0 8 4 12 8 14v8h32v-8c4-2 8-6 8-14c0-12-10-22-24-22z" fill="#BFE8F2" opacity=".85"/><g class="eyes"><circle cx="291" cy="52" r="5" fill="#0F1418"/><circle cx="309" cy="52" r="5" fill="#0F1418"/></g><circle cx="300" cy="52" r="40" fill="#BFE8F2" opacity=".08"/></g>
+  <rect class="drift" x="0" y="112" width="760" height="40" fill="#8FE0D0" opacity=".08"/></svg>`,
+ patch:`<svg viewBox="0 0 600 140" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><rect width="600" height="140" fill="#1A1028"/><circle cx="520" cy="34" r="20" fill="#F7E9BE"/><circle cx="520" cy="34" r="44" fill="#F7E9BE" opacity=".1"/>
+  <path d="M0 96 Q300 80 600 96 V140 H0z" fill="#1F1A10"/>
+  <g stroke="#3F6B26" stroke-width="2.5" fill="none"><path d="M0 112 C80 100 140 124 220 110 S380 100 460 116 S560 108 600 114"/></g>
+  <g><rect x="296" y="40" width="5" height="70" fill="#4A3220"/><rect x="276" y="56" width="46" height="5" fill="#4A3220"/><circle cx="298" cy="40" r="11" fill="#D9A55A"/><path d="M284 34h28l-6 -10h-16z" fill="#2E2238"/><path d="M286 58 l-14 18 M310 58 l14 18" stroke="#B88A3A" stroke-width="3"/><path d="M290 62h18v26h-18z" fill="#5B2333"/></g>
+  ${[[70,118,20],[150,108,14],[210,122,24],[400,114,18],[470,124,26],[548,112,15]].map(([x,y,r])=>`<g><ellipse cx="${x}" cy="${y}" rx="${r}" ry="${r*.75}" fill="#E8751A"/><path d="M${x} ${y-r*.75} q2 -6 6 -7" stroke="#4B7A2A" stroke-width="2.5" fill="none"/>${r>18?`<path d="M${x-8} ${y-2} l3 -4 l3 4z M${x+2} ${y-2} l3 -4 l3 4z M${x-8} ${y+5} q8 5 16 0z" fill="#3A1400"/><circle cx="${x}" cy="${y}" r="${r*1.4}" fill="#FF8A1F" opacity=".12"/>`:''}</g>`).join('')}
+  ${BAT(80,16,20,'#07050A','b3')}</svg>`
+};
+
+/* ---------- sound ---------- */
+const Snd={ctx:null,music:false,fx:false};
+const SKEY='radical-manor-sound';
+try{const t=JSON.parse(localStorage.getItem(SKEY)||'{}');Snd.music=!!t.music;Snd.fx=!!t.fx}catch(e){}
+const mtof=m=>440*Math.pow(2,(m-69)/12);
+function audio(){
+  if(!Snd.ctx){const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return null;const c=new AC();Snd.ctx=c;
+    Snd.master=c.createGain();Snd.master.gain.value=.8;Snd.master.connect(c.destination);
+    const len=c.sampleRate*3,ir=c.createBuffer(2,len,c.sampleRate);for(let ch=0;ch<2;ch++){const d=ir.getChannelData(ch);for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/len,2.6)}
+    Snd.verb=c.createConvolver();Snd.verb.buffer=ir;const vg=c.createGain();vg.gain.value=.45;Snd.verb.connect(vg);vg.connect(Snd.master);
+    Snd.mus=c.createGain();Snd.mus.gain.value=0;Snd.mus.connect(Snd.master);Snd.mus.connect(Snd.verb);
+    Snd.sfx=c.createGain();Snd.sfx.gain.value=.9;Snd.sfx.connect(Snd.master);Snd.sfx.connect(Snd.verb);
+    Snd.noise=c.createBuffer(1,c.sampleRate,c.sampleRate);const nd=Snd.noise.getChannelData(0);for(let i=0;i<nd.length;i++)nd[i]=Math.random()*2-1;}
+  if(Snd.ctx.state==='suspended')Snd.ctx.resume();
+  return Snd.ctx;
+}
+function tone(dest,f,t,dur,{type='sine',vol=.1,att=.01,glide=null}={}){const c=Snd.ctx,o=c.createOscillator(),g=c.createGain();o.type=type;o.frequency.setValueAtTime(f,t);if(glide)o.frequency.exponentialRampToValueAtTime(glide,t+dur);
+  g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol,t+att);g.gain.exponentialRampToValueAtTime(.0001,t+dur);o.connect(g);g.connect(dest);o.start(t);o.stop(t+dur+.05)}
+function noise(dest,t,dur,{vol=.2,type='bandpass',f=1000,f2=null,q=1}={}){const c=Snd.ctx,s=c.createBufferSource(),fl=c.createBiquadFilter(),g=c.createGain();s.buffer=Snd.noise;s.loop=true;fl.type=type;fl.frequency.setValueAtTime(f,t);fl.Q.value=q;if(f2)fl.frequency.exponentialRampToValueAtTime(f2,t+dur);
+  g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol,t+Math.min(.05,dur/3));g.gain.exponentialRampToValueAtTime(.0001,t+dur);s.connect(fl);fl.connect(g);g.connect(dest);s.start(t);s.stop(t+dur+.05)}
+/* music: a slow music-box waltz in A harmonic minor over a drone, with an occasional theremin sigh */
+const MEL=[69,72,76, 81,80,76, 77,76,72, 71,68,64, 69,72,76, 81,83,84, 83,80,76, 69,null,null];
+const BASS=[45,45,41,40,45,41,40,45];
+const STEP=.46;
+function startMusic(){const c=audio();if(!c||Snd.drone)return;
+  Snd.mus.gain.cancelScheduledValues(c.currentTime);Snd.mus.gain.setTargetAtTime(.55,c.currentTime,.8);
+  const lp=c.createBiquadFilter();lp.type='lowpass';lp.frequency.value=380;const lfo=c.createOscillator(),lg=c.createGain();lfo.frequency.value=.07;lg.gain.value=160;lfo.connect(lg);lg.connect(lp.frequency);
+  const dg=c.createGain();dg.gain.value=.07;lp.connect(dg);dg.connect(Snd.mus);
+  const os=[[55,'sawtooth',0],[55.4,'sawtooth',0],[82.4,'sine',0]].map(([f,t])=>{const o=c.createOscillator();o.type=t;o.frequency.value=f;o.connect(lp);o.start();return o});
+  lfo.start();Snd.drone={os,lfo,dg};Snd.step=0;Snd.loop=0;Snd.next=c.currentTime+.2;
+  Snd.timer=setInterval(()=>{while(Snd.next<c.currentTime+.25){schedule(Snd.step,Snd.next);Snd.next+=STEP;Snd.step++;if(Snd.step>=MEL.length){Snd.step=0;Snd.loop++}}},60)}
+function schedule(i,t){const m=MEL[i];if(m){tone(Snd.mus,mtof(m),t,1.4,{type:'sine',vol:.07,att:.005});tone(Snd.mus,mtof(m)*2,t,.6,{type:'sine',vol:.018,att:.005});}
+  if(i%3===0){tone(Snd.mus,mtof(BASS[i/3]),t,STEP*3,{type:'triangle',vol:.09,att:.02})}
+  if(i===0&&Snd.loop%2===1){const c=Snd.ctx,o=c.createOscillator(),g=c.createGain(),v=c.createOscillator(),vg=c.createGain();o.type='sine';o.frequency.setValueAtTime(mtof(88),t);o.frequency.exponentialRampToValueAtTime(mtof(81),t+2.4);
+    v.frequency.value=5.5;vg.gain.value=9;v.connect(vg);vg.connect(o.frequency);g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.035,t+.6);g.gain.linearRampToValueAtTime(0,t+3);o.connect(g);g.connect(Snd.mus);o.start(t);v.start(t);o.stop(t+3.1);v.stop(t+3.1)}}
+function stopMusic(){if(!Snd.ctx||!Snd.drone)return;const c=Snd.ctx,d=Snd.drone;clearInterval(Snd.timer);Snd.mus.gain.setTargetAtTime(0,c.currentTime,.3);
+  setTimeout(()=>{d.os.forEach(o=>o.stop());d.lfo.stop()},1500);Snd.drone=null}
+const SFX={
+  unlock(){const c=audio();if(!c)return;const t=c.currentTime;noise(Snd.sfx,t,.05,{vol:.35,f:3000,q:2});noise(Snd.sfx,t+.09,.05,{vol:.3,f:2200,q:2});[69,73,76,81,85].forEach((m,i)=>tone(Snd.sfx,mtof(m+12),t+.18+i*.09,.9,{vol:.08}))},
+  rattle(){const c=audio();if(!c)return;const t=c.currentTime;[0,.08,.16,.24].forEach(d=>noise(Snd.sfx,t+d,.06,{vol:.3,f:1800,q:6}));tone(Snd.sfx,110,t+.3,.9,{type:'triangle',vol:.18,glide:70})},
+  creak(){const c=audio();if(!c)return;const t=c.currentTime,o=c.createOscillator(),fl=c.createBiquadFilter(),g=c.createGain(),l=c.createOscillator(),lg=c.createGain();
+    o.type='sawtooth';o.frequency.setValueAtTime(70,t);o.frequency.linearRampToValueAtTime(110,t+.5);o.frequency.linearRampToValueAtTime(60,t+1.1);fl.type='bandpass';fl.frequency.value=700;fl.Q.value=7;
+    l.frequency.value=22;lg.gain.value=.5;g.gain.value=0;l.connect(lg);lg.connect(g.gain);g.gain.setValueAtTime(.12,t);g.gain.exponentialRampToValueAtTime(.001,t+1.2);o.connect(fl);fl.connect(g);g.connect(Snd.sfx);o.start(t);l.start(t);o.stop(t+1.3);l.stop(t+1.3)},
+  whoosh(){const c=audio();if(!c)return;const t=c.currentTime;noise(Snd.sfx,t,1.1,{vol:.22,f:300,f2:1600,q:3});tone(Snd.sfx,mtof(76),t+.2,1.2,{vol:.03,glide:mtof(71)})},
+  hmm(){const c=audio();if(!c)return;const t=c.currentTime;tone(Snd.sfx,mtof(64),t,.35,{type:'triangle',vol:.1});tone(Snd.sfx,mtof(63),t+.25,.5,{type:'triangle',vol:.1})},
+  scrape(){const c=audio();if(!c)return;noise(Snd.sfx,c.currentTime,.3,{vol:.14,type:'lowpass',f:700,f2:300})},
+  squeak(){const c=audio();if(!c)return;const t=c.currentTime;tone(Snd.sfx,2200,t,.1,{type:'square',vol:.025,glide:3000});tone(Snd.sfx,2600,t+.13,.1,{type:'square',vol:.02,glide:3400})},
+  sparkle(){const c=audio();if(!c)return;const t=c.currentTime;[88,91,96,100].forEach((m,i)=>tone(Snd.sfx,mtof(m),t+i*.07,.6,{vol:.05}))},
+  found(){const c=audio();if(!c)return;const t=c.currentTime;[69,73,76,81,85].forEach((m,i)=>tone(Snd.sfx,mtof(m+12),t+i*.08,.9,{vol:.08}));tone(Snd.sfx,mtof(57),t,1.2,{type:'triangle',vol:.08})},
+  escape(){const c=audio();if(!c)return;const t=c.currentTime;[57,60,64,69,72,76,81].forEach((m,i)=>tone(Snd.sfx,mtof(m),t+i*.11,1.6,{vol:.07}));[57,61,64,69].forEach(m=>tone(Snd.sfx,mtof(m),t+1,2.6,{type:'triangle',vol:.06,att:.2}));noise(Snd.sfx,t+.8,1.4,{vol:.12,f:400,f2:2400,q:2})}
+};
+function sfx(name){if(Snd.fx)try{SFX[name]()}catch(e){}}
+function saveSnd(){try{localStorage.setItem(SKEY,JSON.stringify({music:Snd.music,fx:Snd.fx}))}catch(e){}}
+function paintTogs(){[['musicTog',Snd.music,'Music'],['fxTog',Snd.fx,'Sounds']].forEach(([id,on,l])=>{const b=$(id);b.setAttribute('aria-pressed',on);b.lastChild.textContent=l+(on?' on':' off')})}
+$('musicTog').onclick=()=>{Snd.music=!Snd.music;Snd.music?startMusic():stopMusic();paintTogs();saveSnd()};
+$('fxTog').onclick=()=>{Snd.fx=!Snd.fx;paintTogs();saveSnd();if(Snd.fx)sfx('whoosh')};
+paintTogs();
+document.addEventListener('pointerdown',function first(){document.removeEventListener('pointerdown',first);if(Snd.music)startMusic();else if(Snd.fx)audio()},{once:false});
+document.addEventListener('visibilitychange',()=>{if(!Snd.ctx)return;document.hidden?Snd.ctx.suspend():Snd.ctx.resume()});
+
+/* bats burst out of the lock */
+function batBurst(lite){if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;const r=$('eq').getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;
+  for(let i=0;i<9;i++){const el=document.createElementNS('http://www.w3.org/2000/svg','svg');el.setAttribute('class','burst'+(lite&&i%2?' lite':''));el.setAttribute('viewBox','0 0 32 32');el.innerHTML='<use href="#i-bat"/>';
+    el.style.left=cx-17+'px';el.style.top=cy-17+'px';document.body.appendChild(el);const a=-Math.PI*(0.1+0.8*Math.random()),d=180+Math.random()*260;
+    el.animate([{transform:'translate(0,0) scale(.4)',opacity:1},{transform:`translate(${Math.cos(a)*d}px,${Math.sin(a)*d}px) scale(${1+Math.random()*.6}) rotate(${(Math.random()-.5)*60}deg)`,opacity:0}],{duration:1200+Math.random()*500,easing:'cubic-bezier(.2,.7,.4,1)'}).onfinish=()=>el.remove()}}
+ART.escape=`<svg viewBox="0 0 600 140" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs><linearGradient id="esky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#140B24"/><stop offset="1" stop-color="#4A2A4E"/></linearGradient></defs><rect width="600" height="140" fill="url(#esky)"/><circle cx="460" cy="44" r="60" fill="#FFE9B0" opacity=".12"/><circle cx="460" cy="44" r="26" fill="#F7E9BE"/>
+  <path d="M0 120 Q300 104 600 120 V140 H0z" fill="#0B0810"/><g fill="#0B0810"><rect x="200" y="60" width="110" height="64"/><polygon points="190,62 255,22 320,62"/><rect x="300" y="40" width="30" height="84"/><polygon points="294,42 315,4 336,42"/></g>
+  <path d="M244 124v-22a11 11 0 0 1 22 0v22z" fill="#FFD36B"/><path d="M244 124 L200 140 H310 L266 124z" fill="#FFD36B" opacity=".25"/>
+  <g fill="#FFB347"><rect class="win" x="214" y="74" width="12" height="16"/><rect class="win w2" x="284" y="74" width="12" height="16"/><rect class="win w3" x="308" y="62" width="12" height="16"/></g>
+  ${BAT(0,30,24,'#07050A','b1')}${BAT(0,50,18,'#07050A','b2')}${BAT(0,20,20,'#07050A','b3')}</svg>`;
+
+/* ---------- search the room for the treasure ---------- */
+const OBJ={
+ sheet:['dusty sheet',`<path d="M8 96C12 52 22 14 50 8C78 14 88 52 92 96C82 89 73 97 64 91C56 98 46 90 37 97C29 90 19 98 8 96z" fill="#CFC6D8"/><path d="M36 30C34 52 30 72 28 92M58 24C62 50 66 72 70 92M48 40C47 60 47 78 48 94" stroke="#A99EB8" stroke-width="3" fill="none"/>`],
+ crate:['crate',`<rect x="8" y="22" width="84" height="74" rx="3" fill="#7A5230"/><path d="M8 46H92M8 72H92" stroke="#5A3A20" stroke-width="4"/><path d="M12 26L88 92" stroke="#5A3A20" stroke-width="6"/><rect x="8" y="22" width="84" height="74" rx="3" fill="none" stroke="#4A2E18" stroke-width="5"/>`],
+ books:['stack of books',`<rect x="12" y="74" width="78" height="20" rx="2" fill="#5B2333"/><rect x="18" y="56" width="66" height="18" rx="2" fill="#2D3E5C"/><rect x="8" y="38" width="74" height="18" rx="2" fill="#3D4D2A"/><rect x="22" y="20" width="62" height="18" rx="2" fill="#432A55"/><path d="M20 84H82M26 65H76M16 47H74M30 29H76" stroke="#E9DCC3" stroke-width="2" opacity=".5"/>`],
+ pumpkin:['pumpkin',`<path d="M50 22c0-8 3-13 9-15" stroke="#4B7A2A" stroke-width="6" fill="none" stroke-linecap="round"/><ellipse cx="31" cy="60" rx="25" ry="34" fill="#D9651A"/><ellipse cx="69" cy="60" rx="25" ry="34" fill="#D9651A"/><ellipse cx="50" cy="60" rx="22" ry="36" fill="#E8751A"/><path d="M50 26v68" stroke="#B5530F" stroke-width="2"/>`],
+ rug:['rolled-up rug',`<rect x="6" y="40" width="82" height="40" rx="6" fill="#7A2430"/><path d="M20 40v40M34 40v40M48 40v40M62 40v40M76 40v40" stroke="#C9A24A" stroke-width="3"/><ellipse cx="88" cy="60" rx="9" ry="20" fill="#5A1820"/><path d="M88 46a8 14 0 1 0 0.1 0" stroke="#C9A24A" stroke-width="2" fill="none"/><path d="M4 30L96 92" stroke="none"/><rect x="2" y="32" width="12" height="56" fill="none"/>`],
+ jar:['old jar',`<rect x="22" y="12" width="56" height="12" rx="3" fill="#6E5A44"/><path d="M18 30Q18 22 30 24H70Q82 22 82 30V88Q82 96 72 96H28Q18 96 18 88z" fill="#5E8C6A" opacity=".95"/><path d="M18 52H82V88Q82 96 72 96H28Q18 96 18 88z" fill="#3E6A4A"/><circle cx="40" cy="70" r="6" fill="#9FC9A0" opacity=".6"/><circle cx="60" cy="78" r="4" fill="#9FC9A0" opacity=".6"/><path d="M28 34v40" stroke="#E8F5E9" stroke-width="4" opacity=".35"/>`],
+ pot:['iron pot',`<path d="M8 36H92L86 70A36 26 0 0 1 14 70z" fill="#1E1A18"/><ellipse cx="50" cy="36" rx="44" ry="8" fill="#2E2826"/><path d="M14 36q-10-12 0-20M86 36q10-12 0-20" stroke="#2E2826" stroke-width="5" fill="none"/><path d="M24 92l6-14M76 92l-6-14" stroke="#1E1A18" stroke-width="6"/>`],
+ barrel:['barrel',`<path d="M20 10H80Q94 50 80 92H20Q6 50 20 10z" fill="#7A5230"/><path d="M12 30H88M10 72H90" stroke="#3A3A3A" stroke-width="6"/><path d="M36 10Q30 50 36 92M64 10Q70 50 64 92" stroke="#5A3A20" stroke-width="3" fill="none"/>`],
+ trunk:['old trunk',`<path d="M8 40Q8 18 50 18Q92 18 92 40V94H8z" fill="#5A3B1E"/><path d="M8 42H92" stroke="#3A2416" stroke-width="5"/><path d="M26 18V94M74 18V94" stroke="#B8A27A" stroke-width="5"/><rect x="42" y="36" width="16" height="16" rx="2" fill="#B8A27A"/>`],
+ stone:['tombstone',`<path d="M16 96V36A34 30 0 0 1 84 36V96z" fill="#4E5A62"/><path d="M16 96V36A34 30 0 0 1 84 36" fill="none" stroke="#3A444A" stroke-width="4"/><text x="50" y="58" text-anchor="middle" font-family="serif" font-size="18" font-weight="700" fill="#2A3238">R.I.P.</text><path d="M30 74H70M34 84H66" stroke="#3A444A" stroke-width="3"/>`],
+ bones:['pile of bones',`<g fill="#E6DCC8" stroke="#B8AC94" stroke-width="2"><path d="M14 80l56-34" stroke-width="10" stroke="#E6DCC8"/><circle cx="12" cy="76" r="7"/><circle cx="16" cy="86" r="7"/><circle cx="70" cy="40" r="7"/><circle cx="76" cy="50" r="7"/><path d="M30 46l50 40" stroke-width="10" stroke="#D9CEB6"/><circle cx="26" cy="40" r="7"/><circle cx="32" cy="50" r="7"/><circle cx="80" cy="92" r="7"/><circle cx="86" cy="82" r="7"/><path d="M50 18c-12 0-20 8-20 18c0 6 4 10 7 12v8h26v-8c3-2 7-6 7-12c0-10-8-18-20-18z"/></g><circle cx="43" cy="36" r="4.5" fill="#2A3238"/><circle cx="57" cy="36" r="4.5" fill="#2A3238"/>`]
+};
+const SEARCH={key:['sheet','crate','pumpkin','books','rug'],candle:['books','sheet','jar','crate','books'],potion:['pot','barrel','jar','pumpkin','sheet'],bat:['trunk','crate','sheet','rug','books'],skull:['stone','bones','sheet','jar','stone']};
+const BACK={key:['#2A1D36','#3A2416'],candle:['#211A2E','#2E1E14'],potion:['#26190F','#1A120C'],bat:['#221828','#3A2A1C'],skull:['#18222A','#252E33']};
+const SPOTS=[[16,62],[36,38],[52,70],[70,40],[86,66]];
+function backdrop(item){const [w,f]=BACK[item];return `<svg class="sbg" viewBox="0 0 400 300" preserveAspectRatio="none" aria-hidden="true"><defs><radialGradient id="vig" cx="50%" cy="45%" r="70%"><stop offset=".55" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".6"/></radialGradient><radialGradient id="lamp" cx="50%" cy="10%" r="60%"><stop offset="0" stop-color="#FFD36B" stop-opacity=".18"/><stop offset="1" stop-color="#FFD36B" stop-opacity="0"/></radialGradient></defs>
+  <rect width="400" height="300" fill="${w}"/>${item==='skull'?Array.from({length:40},(_,i)=>`<rect x="${(i%10)*40+(Math.floor(i/10)%2?20:0)}" y="${Math.floor(i/10)*30}" width="38" height="28" fill="#000" opacity=".12"/>`).join(''):`<path d="M0 118H400" stroke="#000" stroke-opacity=".25" stroke-width="4"/>`}
+  <path d="M0 130H400V300H0z" fill="${f}"/>${Array.from({length:9},(_,i)=>`<path d="M${i*50-20} 300L${i*50+10} 130" stroke="#000" stroke-opacity=".22" stroke-width="2"/>`).join('')}<path d="M0 130H400" stroke="#000" stroke-opacity=".35" stroke-width="3"/>
+  <rect width="400" height="300" fill="url(#lamp)"/><rect width="400" height="300" fill="url(#vig)"/></svg>`}
+const SPIDER='<svg viewBox="0 0 32 32"><g stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"><path d="M12 14L4 8M12 16L3 16M12 18L4 24M20 14l8-6M20 16h9M20 18l8 6"/></g><ellipse cx="16" cy="16" rx="6" ry="7" fill="currentColor"/><circle cx="16" cy="9" r="4" fill="currentColor"/><circle cx="14.6" cy="8.4" r="1" fill="#FF7A70"/><circle cx="17.4" cy="8.4" r="1" fill="#FF7A70"/></svg>';
+
+function buildSearch(room,last){
+  const box=$('search'),list=SEARCH[room.item].slice().sort(()=>Math.random()-.5),hide=ri(0,4);
+  const others=[0,1,2,3,4].filter(i=>i!==hide).sort(()=>Math.random()-.5).slice(0,2);
+  let html=backdrop(room.item);
+  others.forEach(i=>{const [x,y]=SPOTS[i];html+=`<span class="spider" data-for="${i}" style="left:${x}%;top:${y}%">${SPIDER}</span>`});
+  const [hx,hy]=SPOTS[hide];
+  html+=`<button class="sitem" id="sItem" disabled tabindex="-1" aria-label="Grab the ${room.itemName}" style="left:${hx}%;top:${hy}%">${icon(room.item)}</button>`;
+  list.forEach((k,i)=>{const [x,y]=SPOTS[i];html+=`<button class="sobj" data-i="${i}" aria-label="Move the ${OBJ[k][0]}" style="left:${x}%;top:${y}%"><svg viewBox="0 0 100 100" aria-hidden="true">${OBJ[k][1]}</svg></button>`});
+  html+=`<div class="shint" id="sHint">Drag things out of the way, or tap them, to search.</div>`;
+  box.innerHTML=html;
+  const item=$('sItem'),hint=$('sHint');let found=false,tries=0;
+  const pos=el=>({x:parseFloat(el.style.left),y:parseFloat(el.style.top)});
+  function covered(pt){const W=box.clientWidth,H=box.clientHeight;return [...box.querySelectorAll('.sobj')].some(o=>{const p=pos(o),w=o.offsetWidth,h=o.offsetHeight;return Math.abs((p.x-pt.x)/100*W)<w*.36&&Math.abs((p.y-pt.y)/100*H)<h*.36})}
+  function checkAll(){
+    box.querySelectorAll('.spider:not(.gone)').forEach(sp=>{if(!covered(pos(sp))){sp.classList.add('gone');sfx('squeak');hint.textContent=pick(['Eek! Just a spider.','Only a spider. Keep looking!','A spider scurries away…']);
+      sp.animate([{transform:'translate(-50%,-50%)',opacity:1},{transform:`translate(${(Math.random()<.5?-1:1)*260}%,${-120-Math.random()*200}%) rotate(${Math.random()*90}deg)`,opacity:0}],{duration:900,easing:'ease-in',fill:'forwards'})}});
+    if(!found&&!covered(pos(item))){found=true;item.disabled=false;item.removeAttribute('tabindex');item.classList.add('found');sfx('sparkle');hint.textContent=`There it is! Tap the ${room.itemName} to grab it.`;item.focus({preventScroll:true})}
+  }
+  function nudge(o){const p=pos(o),W=box.clientWidth,dxp=o.offsetWidth*.75/W*100;let nx=p.x+(p.x>50?-dxp:dxp);if(nx<6||nx>94)nx=p.x+(p.x>50?dxp:-dxp);
+    o.classList.add('slide');o.style.left=Math.max(5,Math.min(95,nx))+'%';o.style.top=Math.max(12,Math.min(88,p.y+(p.y>55?-14:14)))+'%';sfx('scrape');moved();setTimeout(()=>{o.classList.remove('slide');checkAll()},360)}
+  function moved(){tries++;if(!found&&tries%4===0){const hider=box.querySelector(`.sobj[data-i="${hide}"]`);if(hider&&covered(pos(item))){hider.classList.remove('wiggle');void hider.offsetWidth;hider.classList.add('wiggle');hint.textContent='Something rattled… did you hear that?'}}}
+  box.querySelectorAll('.sobj').forEach(o=>{
+    let st=null;
+    o.addEventListener('pointerdown',e=>{e.preventDefault();o.setPointerCapture(e.pointerId);const p=pos(o);st={x:e.clientX,y:e.clientY,l:p.x,t:p.y,m:0};o.classList.add('drag')});
+    o.addEventListener('pointermove',e=>{if(!st)return;const W=box.clientWidth,H=box.clientHeight,dx=e.clientX-st.x,dy=e.clientY-st.y;
+      if(st.m<6&&Math.hypot(dx,dy)>=6)sfx('scrape');st.m=Math.max(st.m,Math.hypot(dx,dy));
+      o.style.left=Math.max(4,Math.min(96,st.l+dx/W*100))+'%';o.style.top=Math.max(8,Math.min(92,st.t+dy/H*100))+'%';checkAll()});
+    const end=()=>{if(!st)return;const m=st.m;st=null;o.classList.remove('drag');if(m<6)nudge(o);else{moved();checkAll()}};
+    o.addEventListener('pointerup',end);o.addEventListener('pointercancel',end);
+    o.addEventListener('click',e=>{if(e.detail===0)nudge(o)});
+  });
+  item.onclick=()=>{if(item.disabled)return;item.disabled=true;
+    const slot=$('inv').querySelectorAll('.slot')[S.solved-1],a=item.getBoundingClientRect(),b=slot?slot.getBoundingClientRect():a;
+    const fly=document.createElementNS('http://www.w3.org/2000/svg','svg');fly.setAttribute('class','burst lite');fly.setAttribute('viewBox','0 0 32 32');fly.innerHTML=`<use href="#i-${room.item}"/>`;
+    fly.style.left=a.left+'px';fly.style.top=a.top+'px';fly.style.width=a.width+'px';fly.style.height=a.height+'px';document.body.appendChild(fly);item.style.visibility='hidden';
+    sfx(last?'escape':'found');
+    const finish=()=>{fly.remove();S.hunting=false;renderInv();const s2=$('inv').querySelectorAll('.slot')[S.solved-1];if(s2)s2.classList.add('pop');save();
+      $('afterFind').innerHTML=`<p>You found the <b>${room.itemName}</b>!${last?' That was the last treasure.':''}</p><div class="actions">${last?'<button class="btn primary" id="goNext">Open the front gate</button>':'<button class="btn primary" id="goNext">Next room</button><button class="btn quiet" id="goHall">Back to the hall</button>'}</div>`;
+      $('goNext').onclick=()=>last?showDone():enterRoom();if($('goHall'))$('goHall').onclick=()=>{show('hall');renderHall()};$('goNext').focus()};
+    if(matchMedia('(prefers-reduced-motion: reduce)').matches)return finish();
+    fly.animate([{transform:'translate(0,0) scale(1)'},{transform:`translate(${b.left-a.left}px,${b.top-a.top}px) scale(.8)`}],{duration:800,easing:'cubic-bezier(.5,-.3,.6,1)'}).onfinish=finish};
+}
+
+/* ---------- boot ---------- */
+load();S.hunting=false;
+if(!S.name)show('start');
+else if(S.escaped&&S.view!=='solve')showDone();
+else{show('hall');renderHall()}
+})();
+</script>
+
+</body></html>
